@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dimension</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -837,6 +838,12 @@
             <button class="btn btn-blue btn-sm" onclick="triggerLoadFile()">&#128194; Load Config…</button>
           </div>
         </div>
+        <div class="sl-group">
+          <label>YAML Layout File</label>
+          <div class="sl-row">
+            <button class="btn btn-blue btn-sm" onclick="triggerLoadYaml()">&#128203; Load YAML…</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -857,8 +864,9 @@
     </div>
   </div>
 
-  <!-- hidden file input for load — lives outside all sections so it works from anywhere -->
-  <input type="file" id="loadFileInput" accept=".json" style="display:none;" onchange="loadConfigFromFile(event)" />
+  <!-- hidden file inputs — live outside all sections so they work from anywhere -->
+  <input type="file" id="loadFileInput"  accept=".json"       style="display:none;" onchange="loadConfigFromFile(event)" />
+  <input type="file" id="loadYamlInput"  accept=".yaml,.yml"  style="display:none;" onchange="loadYamlFromFile(event)" />
 
   <!-- Step 3: Layout Output -->
   <div id="layoutSection" class="hidden">
@@ -1107,7 +1115,7 @@
   function getSlotMap(ci) { return cabinetDefs[ci]?.slotMap || []; }
 
   // ── Compute Slot Definition (Step 1 UI) ──────────────────────
-  // Each row: { startU: number|'', uSize: number, isLast: boolean }
+  // Each row: { startU: number|'', uSize: number }
   let _csdRows = [];
 
   function renderCsdRows() {
@@ -1126,16 +1134,11 @@
         <input type="number" id="csd-size-${idx}" min="1" max="20" value="${r.uSize}"
                oninput="_csdRows[${idx}].uSize = Math.max(1, +this.value || 1)" />
         <button class="csd-remove" onclick="removeComputeRow(${idx})" title="Remove this slot">&#215;</button>
-        <label class="csd-last-label">
-          <input type="checkbox" ${r.isLast ? 'checked' : ''} onchange="onLastComputeToggle(${idx}, this.checked)" />
-          Last
-        </label>
       `;
       container.appendChild(div);
     });
-    const hasLast = _csdRows.some(r => r.isLast);
     const btn = document.getElementById('csdAddCabBtn');
-    if (btn) btn.style.display = (hasLast && _csdRows.length > 0) ? 'inline-flex' : 'none';
+    if (btn) btn.style.display = _csdRows.length > 0 ? 'inline-flex' : 'none';
   }
 
   function addComputeRow() {
@@ -1148,7 +1151,7 @@
       const prevSize  = Math.max(1, parseInt(prev.uSize) || 1);
       defaultStart = prevStart + prevSize;
     }
-    _csdRows.push({ startU: defaultStart, uSize: 2, isLast: false });
+    _csdRows.push({ startU: defaultStart, uSize: 2 });
     renderCsdRows();
   }
 
@@ -1157,22 +1160,14 @@
     renderCsdRows();
   }
 
-  function onLastComputeToggle(idx, checked) {
-    // Only one row can be "last" at a time
-    _csdRows.forEach((r, i) => { r.isLast = (i === idx) ? checked : false; });
-    renderCsdRows();
-  }
-
   function buildComputeSlotMap() {
     if (_csdRows.length === 0) {
       alert('Please define at least one compute slot position.');
       return false;
     }
-    const lastIdx = _csdRows.findIndex(r => r.isLast);
-    const endIdx  = lastIdx >= 0 ? lastIdx : _csdRows.length - 1;
     const cabinetH = parseInt(document.getElementById('newCabHeight').value) || 48;
     const result = [];
-    for (let i = 0; i <= endIdx; i++) {
+    for (let i = 0; i < _csdRows.length; i++) {
       const r = _csdRows[i];
       const startU = parseInt(r.startU);
       const uSize  = Math.max(1, parseInt(r.uSize) || 1);
@@ -1203,7 +1198,7 @@
     // Reset form for next cabinet
     document.getElementById('newCabName').value = '';
     document.getElementById('copyFromSelect').value = '';
-    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
+    _csdRows = [{ startU: 1, uSize: 2 }];
     renderCsdRows();
   }
 
@@ -3496,6 +3491,66 @@
     closePrintSetup();
     setTimeout(() => window.print(), 60);
   }
+
+  // ── YAML Load ─────────────────────────────────────────────────
+  function triggerLoadYaml() {
+    const input = document.getElementById('loadYamlInput');
+    input.value = '';
+    input.click();
+  }
+
+  function loadYamlFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try { applyYamlConfig(e.target.result); }
+      catch(err) { alert('Could not read YAML file: ' + err.message); }
+    };
+    reader.readAsText(file);
+  }
+
+  function applyYamlConfig(text) {
+    let data;
+    try { data = jsyaml.load(text); }
+    catch(e) { alert('Invalid YAML: ' + e.message); return; }
+
+    if (!data || !Array.isArray(data.shelf) || data.shelf.length === 0) {
+      alert('YAML must have a top-level "shelf" array with at least one entry.');
+      return;
+    }
+
+    cabinetDefs = [];
+    data.shelf.forEach((shelf, si) => {
+      const name     = `Shelf ${shelf.id != null ? shelf.id : si + 1}`;
+      const computes = Array.isArray(shelf.Cabinet) ? shelf.Cabinet : [];
+      const slotMap  = computes.map(c => {
+        const startU = Math.max(1, parseInt(c.slot) || 1);
+        const uSize  = Math.max(1, parseInt(c.size) || 1);
+        return [startU, startU + uSize - 1];
+      });
+      // Cabinet height = highest topU across all compute slots
+      const height = slotMap.reduce((m, [, t]) => Math.max(m, t), 8);
+      cabinetDefs.push({ name, height, slotMap });
+    });
+
+    // Reset allocation state
+    hasGeneratedBefore = false;
+    manualComputes  = {};
+    userAddedSlots  = new Set();
+    vm1Assignments  = {}; haAssignments  = {};
+    mmeAssignments  = {}; cgwAssignments = {};
+    vm1Committed = false; haCommitted = false;
+    clearMmeCgwState();
+    document.getElementById('dismantleInput').value = '';
+
+    // Show Step 1 config area with the loaded cabinets, then advance to Step 2
+    document.getElementById('layoutSection').classList.add('hidden');
+    document.getElementById('configSection').classList.remove('hidden');
+    renderCabinetList();
+    showServerCountStep();
+  }
+  // ─────────────────────────────────────────────────────────────
 </script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 </body>
