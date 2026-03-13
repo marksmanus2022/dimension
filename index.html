@@ -783,66 +783,18 @@
   <!-- Step 1 & 2: Configuration -->
   <div id="configSection">
     <div class="card">
-      <h2>Step 1 — Define Cabinet</h2>
-      <p>Define each cabinet's height and compute slot positions, then click <strong>+ Add Cabinet</strong>. Repeat for every cabinet, then configure server counts.</p>
-      <div>
-        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
-          <div>
-            <label for="siteName">Site Name</label>
-            <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:200px;" />
-          </div>
-          <div>
-            <label for="newCabName">Cabinet Name</label>
-            <input type="text" id="newCabName" placeholder="e.g. Cabinet 1" style="width:160px;" />
-          </div>
-          <div>
-            <label for="newCabHeight">Cabinet Height (U)</label>
-            <input type="number" id="newCabHeight" min="1" max="200" value="48" style="width:90px;" />
-          </div>
+      <h2>Step 1 — Define Cabinet Layout</h2>
+      <p>Enter a site name, then load a YAML file to define your cabinet layout.</p>
+      <div style="display:flex; flex-direction:column; gap:20px; max-width:400px;">
+        <div>
+          <label for="siteName">Site Name</label>
+          <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:100%; margin-top:6px;" />
         </div>
-        <!-- Copy-from row — shown only when ≥1 cabinet already defined -->
-        <div id="copyFromRow" class="hidden" style="display:none; align-items:center; gap:10px; margin-bottom:16px; padding:8px 12px; background:#161b22; border:1px solid #30363d; border-radius:6px; flex-wrap:wrap;">
-          <span style="font-size:12px; color:#8b949e;">Copy slots & height from:</span>
-          <select id="copyFromSelect" onchange="copyFromCabinet(this.value)"
-                  style="background:#0d1117; border:1px solid #30363d; border-radius:5px; color:#e6edf3; padding:4px 10px; font-size:13px; cursor:pointer;">
-            <option value="">— select existing cabinet —</option>
-          </select>
-        </div>
-
-        <!-- Compute slot definition -->
-        <div class="csd-section">
-          <div class="csd-title">Compute Slot Positions</div>
-          <div id="csdRows"></div>
-          <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="addComputeRow()">&#43; Add Compute Slot</button>
-            <button class="btn btn-blue" id="csdAddCabBtn" onclick="addCabinet()" style="display:none;">&#43; Add Cabinet</button>
-          </div>
-        </div>
-
-        <!-- Defined cabinets list -->
-        <div id="cabinetListSection" class="hidden" style="margin-top:24px; border-top:1px solid #30363d; padding-top:20px;">
-          <div class="csd-title" style="margin-bottom:12px;">Defined Cabinets</div>
-          <div id="cabinetListEl"></div>
-          <div style="margin-top:14px;">
-            <button class="btn btn-primary" id="csdProceedBtn" onclick="showServerCountStep()">&#9654; Configure Servers</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Save / Load -->
-      <div class="save-load-panel">
-        <div class="sl-group">
-          <label>Configuration File</label>
-          <div class="sl-row">
-            <button class="btn btn-save btn-sm" id="saveBtn" onclick="saveConfig('saveBtn')">&#128190; Save Config…</button>
-            <button class="btn btn-blue btn-sm" onclick="triggerLoadFile()">&#128194; Load Config…</button>
-          </div>
-        </div>
-        <div class="sl-group">
-          <label>YAML Layout File</label>
-          <div class="sl-row">
-            <button class="btn btn-blue btn-sm" onclick="triggerLoadYaml()">&#128203; Load YAML…</button>
-          </div>
+        <div>
+          <label style="display:block; margin-bottom:6px;">Cabinet Layout</label>
+          <button class="btn btn-primary" onclick="triggerLoadYaml()" style="width:100%; padding:10px 0; font-size:14px;">
+            &#128203; Load YAML…
+          </button>
         </div>
       </div>
     </div>
@@ -2661,15 +2613,10 @@
     document.getElementById('layoutSection').classList.add('hidden');
     document.getElementById('cabinetInputArea').classList.add('hidden');
     document.getElementById('configSection').classList.remove('hidden');
-    document.getElementById('cabinetListSection').classList.add('hidden');
-    document.getElementById('cabinetListEl').innerHTML = '';
     document.getElementById('cabinetGrid').innerHTML = '';
     document.getElementById('layoutGrid').innerHTML = '';
     document.getElementById('siteNameDisplay').style.display = 'none';
-    document.getElementById('newCabName').value = '';
-    document.getElementById('newCabHeight').value = 48;
-    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
-    renderCsdRows();
+    document.getElementById('siteName').value = '';
     vm1Assignments = {};
     haAssignments  = {};
     vm1Committed   = false;
@@ -2699,8 +2646,6 @@
   }
 
   // initialise
-  _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
-  renderCsdRows();
   setStepState(1);
 
   // ── Save / Load ───────────────────────────────────────────────
@@ -3548,10 +3493,9 @@
     clearMmeCgwState();
     document.getElementById('dismantleInput').value = '';
 
-    // Show Step 1 config area with the loaded cabinets, then advance to Step 2
+    // Show Step 1 config area then advance to Step 2
     document.getElementById('layoutSection').classList.add('hidden');
     document.getElementById('configSection').classList.remove('hidden');
-    renderCabinetList();
     showServerCountStep();
   }
   // ─────────────────────────────────────────────────────────────
