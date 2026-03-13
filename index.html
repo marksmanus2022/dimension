@@ -665,20 +665,32 @@
   <div id="configSection">
     <div class="card">
       <h2>Step 1 — Define Cabinet Layout</h2>
-      <p>Enter a site name, then load a YAML file to define your cabinet layout.
-         <a href="#" onclick="downloadSampleYaml(); return false;"
-            style="color:#58a6ff; font-size:12px; margin-left:8px;">&#11015; Download sample YAML</a>
-      </p>
+      <p>Enter a site name, then load YAML files to define your cabinet and switch layout.</p>
       <div style="display:flex; flex-direction:column; gap:20px; max-width:400px;">
         <div>
           <label for="siteName">Site Name</label>
           <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:100%; margin-top:6px;" />
         </div>
         <div>
-          <label style="display:block; margin-bottom:6px;">Cabinet Layout</label>
+          <label style="display:block; margin-bottom:6px;">
+            Cabinet Layout
+            <a href="#" onclick="downloadSampleYaml(); return false;"
+               style="color:#58a6ff; font-size:11px; margin-left:8px;">&#11015; Download sample</a>
+          </label>
           <button class="btn btn-primary" onclick="triggerLoadYaml()" style="width:100%; padding:10px 0; font-size:14px;">
-            &#128203; Load YAML…
+            &#128203; Load Cabinet YAML…
           </button>
+        </div>
+        <div>
+          <label style="display:block; margin-bottom:6px;">
+            Switch Layout
+            <a href="#" onclick="downloadSampleSwitchYaml(); return false;"
+               style="color:#58a6ff; font-size:11px; margin-left:8px;">&#11015; Download sample</a>
+          </label>
+          <button class="btn btn-secondary" onclick="triggerLoadSwitchYaml()" style="width:100%; padding:10px 0; font-size:14px;">
+            &#128203; Load Switch YAML…
+          </button>
+          <div id="switchYamlStatus" style="margin-top:6px; font-size:12px; color:#8b949e;"></div>
         </div>
       </div>
     </div>
@@ -701,8 +713,9 @@
   </div>
 
   <!-- hidden file inputs — live outside all sections so they work from anywhere -->
-  <input type="file" id="loadFileInput"  accept=".json"       style="display:none;" onchange="loadConfigFromFile(event)" />
-  <input type="file" id="loadYamlInput"  accept=".yaml,.yml"  style="display:none;" onchange="loadYamlFromFile(event)" />
+  <input type="file" id="loadFileInput"       accept=".json"       style="display:none;" onchange="loadConfigFromFile(event)" />
+  <input type="file" id="loadYamlInput"       accept=".yaml,.yml"  style="display:none;" onchange="loadYamlFromFile(event)" />
+  <input type="file" id="loadSwitchYamlInput" accept=".yaml,.yml"  style="display:none;" onchange="loadSwitchYamlFromFile(event)" />
 
   <!-- Step 3: Layout Output -->
   <div id="layoutSection" class="hidden">
@@ -2376,6 +2389,8 @@
     document.getElementById('layoutGrid').innerHTML = '';
     document.getElementById('siteNameDisplay').style.display = 'none';
     document.getElementById('siteName').value = '';
+    document.getElementById('switchYamlStatus').textContent = '';
+    cabSwitches = {};
     setStepState(1);
   }
 
@@ -3285,6 +3300,100 @@
     document.getElementById('layoutSection').classList.add('hidden');
     document.getElementById('configSection').classList.remove('hidden');
     showServerCountStep();
+  }
+  // ── Switch YAML Load ──────────────────────────────────────────
+  const SAMPLE_SWITCH_YAML = `switches:
+  - shelf_id: 1
+    slot: 1
+    name: SW-Core-1
+  - shelf_id: 1
+    slot: 2
+    name: SW-Access-1
+  - shelf_id: 2
+    slot: 1
+    name: SW-Core-2
+`;
+
+  function downloadSampleSwitchYaml() {
+    const blob = new Blob([SAMPLE_SWITCH_YAML], { type: 'text/yaml' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sample-switch-layout.yaml';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function triggerLoadSwitchYaml() {
+    const input = document.getElementById('loadSwitchYamlInput');
+    input.value = '';
+    input.click();
+  }
+
+  function loadSwitchYamlFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try { applySwitchYamlConfig(e.target.result, file.name); }
+      catch(err) { alert('Could not read switch YAML file: ' + err.message); }
+    };
+    reader.readAsText(file);
+  }
+
+  function applySwitchYamlConfig(text, fileName) {
+    let data;
+    try { data = jsyaml.load(text); }
+    catch(e) { alert('Invalid YAML: ' + e.message); return; }
+
+    if (!data || !Array.isArray(data.switches) || data.switches.length === 0) {
+      alert('Switch YAML must have a top-level "switches" array with at least one entry.');
+      return;
+    }
+
+    if (cabinetDefs.length === 0) {
+      alert('Please load a Cabinet YAML first so shelf IDs can be matched.');
+      return;
+    }
+
+    // Build a map from shelf id → cabinet index
+    const shelfIdToCi = {};
+    cabinetDefs.forEach((def, ci) => {
+      // cabinetDefs names are "Shelf N" — extract the id
+      const match = def.name.match(/Shelf\s+(\S+)/i);
+      if (match) shelfIdToCi[match[1]] = ci;
+    });
+
+    cabSwitches = {};
+    let count = 0;
+    const warnings = [];
+    data.switches.forEach(sw => {
+      const shelfId = String(sw.shelf_id ?? '');
+      const ci = shelfIdToCi[shelfId];
+      if (ci === undefined) {
+        warnings.push(`shelf_id "${shelfId}" not found — skipped.`);
+        return;
+      }
+      const u = parseInt(sw.slot);
+      if (!u || u < 1) { warnings.push(`Invalid slot "${sw.slot}" — skipped.`); return; }
+      const label = (sw.name || `SW-${count + 1}`).trim();
+      if (!cabSwitches[ci]) cabSwitches[ci] = {};
+      cabSwitches[ci][u] = label;
+      count++;
+    });
+
+    const statusEl = document.getElementById('switchYamlStatus');
+    if (warnings.length) {
+      statusEl.style.color = '#f0a83a';
+      statusEl.textContent = `⚠ Loaded ${count} switch(es) from ${fileName}. ${warnings.join(' ')}`;
+    } else {
+      statusEl.style.color = '#3fb950';
+      statusEl.textContent = `✔ Loaded ${count} switch(es) from ${fileName}`;
+    }
+
+    // Re-render racks if layout is already visible
+    if (!document.getElementById('layoutSection').classList.contains('hidden')) {
+      rerenderRacks();
+    }
   }
   // ─────────────────────────────────────────────────────────────
 </script>
