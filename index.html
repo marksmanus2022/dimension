@@ -782,8 +782,8 @@
   <!-- Step 1 & 2: Configuration -->
   <div id="configSection">
     <div class="card">
-      <h2>Step 1 — Cabinet Configuration</h2>
-      <p>Enter the number of cabinets you want to deploy, then specify the servers for each cabinet.</p>
+      <h2>Step 1 — Define Cabinet</h2>
+      <p>Define each cabinet's height and compute slot positions, then click <strong>+ Add Cabinet</strong>. Repeat for every cabinet, then configure server counts.</p>
       <div>
         <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
           <div>
@@ -791,12 +791,12 @@
             <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:200px;" />
           </div>
           <div>
-            <label for="numCabinets">Number of Cabinets</label>
-            <input type="number" id="numCabinets" min="1" max="20" value="6" />
+            <label for="newCabName">Cabinet Name</label>
+            <input type="text" id="newCabName" placeholder="e.g. Cabinet 1" style="width:160px;" />
           </div>
           <div>
-            <label for="cabinetSize">Cabinet Height (U)</label>
-            <input type="number" id="cabinetSize" min="1" max="200" value="48" style="width:90px;" />
+            <label for="newCabHeight">Cabinet Height (U)</label>
+            <input type="number" id="newCabHeight" min="1" max="200" value="48" style="width:90px;" />
           </div>
         </div>
 
@@ -806,7 +806,16 @@
           <div id="csdRows"></div>
           <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
             <button class="btn btn-secondary btn-sm" onclick="addComputeRow()">&#43; Add Compute Slot</button>
-            <button class="btn btn-blue" id="csdProceedBtn" onclick="buildCabinetInputs()">&#9654; Set Cabinets</button>
+            <button class="btn btn-blue" id="csdAddCabBtn" onclick="addCabinet()" style="display:none;">&#43; Add Cabinet</button>
+          </div>
+        </div>
+
+        <!-- Defined cabinets list -->
+        <div id="cabinetListSection" class="hidden" style="margin-top:24px; border-top:1px solid #30363d; padding-top:20px;">
+          <div class="csd-title" style="margin-bottom:12px;">Defined Cabinets</div>
+          <div id="cabinetListEl"></div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-primary" id="csdProceedBtn" onclick="showServerCountStep()">&#9654; Configure Servers</button>
           </div>
         </div>
       </div>
@@ -1085,8 +1094,9 @@
 
   // ── Compute slot map — built dynamically from user input ────
   // Each entry is [bottomU, topU]. Compute index 0 → first entry, etc.
-  let computeSlotMap = [];
-  function getSlotMap(ci) { return computeSlotMap; }
+  let computeSlotMap = []; // temp: built from _csdRows for the cabinet being defined
+  let cabinetDefs    = []; // [{name, height, slotMap}] — one entry per defined cabinet
+  function getSlotMap(ci) { return cabinetDefs[ci]?.slotMap || []; }
 
   // ── Compute Slot Definition (Step 1 UI) ──────────────────────
   // Each row: { startU: number|'', uSize: number, isLast: boolean }
@@ -1116,7 +1126,7 @@
       container.appendChild(div);
     });
     const hasLast = _csdRows.some(r => r.isLast);
-    const btn = document.getElementById('csdProceedBtn');
+    const btn = document.getElementById('csdAddCabBtn');
     if (btn) btn.style.display = (hasLast && _csdRows.length > 0) ? '' : 'none';
   }
 
@@ -1143,7 +1153,7 @@
     }
     const lastIdx = _csdRows.findIndex(r => r.isLast);
     const endIdx  = lastIdx >= 0 ? lastIdx : _csdRows.length - 1;
-    const cabinetH = parseInt(document.getElementById('cabinetSize').value) || 48;
+    const cabinetH = parseInt(document.getElementById('newCabHeight').value) || 48;
     const result = [];
     for (let i = 0; i <= endIdx; i++) {
       const r = _csdRows[i];
@@ -1163,6 +1173,84 @@
     }
     computeSlotMap = result;
     return true;
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  function addCabinet() {
+    if (!buildComputeSlotMap()) return;
+    const name   = (document.getElementById('newCabName').value || '').trim()
+                   || `Cabinet ${cabinetDefs.length + 1}`;
+    const height = parseInt(document.getElementById('newCabHeight').value) || 48;
+    cabinetDefs.push({ name, height, slotMap: computeSlotMap.map(e => [...e]) });
+    renderCabinetList();
+    // Reset form for next cabinet
+    document.getElementById('newCabName').value = '';
+    _csdRows = [{ startU: '', uSize: 2, isLast: false }];
+    renderCsdRows();
+  }
+
+  function removeCabinet(idx) {
+    cabinetDefs.splice(idx, 1);
+    renderCabinetList();
+  }
+
+  function renderCabinetList() {
+    const section = document.getElementById('cabinetListSection');
+    const listEl  = document.getElementById('cabinetListEl');
+    if (!section || !listEl) return;
+    if (cabinetDefs.length === 0) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    listEl.innerHTML = '';
+    cabinetDefs.forEach((def, ci) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 12px; background:#0d1117; border:1px solid #30363d; border-radius:6px; margin-bottom:6px;';
+      div.innerHTML = `
+        <span style="color:#58a6ff; font-weight:700; min-width:28px;">C${ci + 1}</span>
+        <span style="color:#e6edf3; font-weight:600; min-width:140px;">${def.name}</span>
+        <span style="color:#8b949e; font-size:12px;">${def.height}U &nbsp;|&nbsp; ${def.slotMap.length} compute slot${def.slotMap.length !== 1 ? 's' : ''}</span>
+        <button class="btn btn-danger btn-sm" onclick="removeCabinet(${ci})" style="margin-left:auto;">&#10005; Remove</button>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  function showServerCountStep() {
+    if (cabinetDefs.length === 0) { alert('Please add at least one cabinet first.'); return; }
+    const table = document.getElementById('cabinetGrid');
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th class="cab-num">#</th>
+          <th>Cabinet</th>
+          <th>Number of Servers</th>
+          <th>First # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
+          <th>Last # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
+        </tr>
+      </thead>
+      <tbody id="cabinetTbody"></tbody>
+    `;
+    const tbody = table.querySelector('#cabinetTbody');
+    cabinetDefs.forEach((def, ci) => {
+      const i = ci + 1;
+      const maxSlots = def.slotMap.length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="cab-num" style="color:#58a6ff; font-weight:700;">C${i}</td>
+        <td style="color:#e6edf3; font-weight:600;">${def.name} <span style="color:#8b949e; font-size:11px; font-weight:400;">${def.height}U</span></td>
+        <td>
+          <input type="number" id="cab-count-${i}" min="0" max="${maxSlots}" value="${maxSlots}"
+            style="width:70px;" oninput="wrapCount(this, ${maxSlots})" />
+          <span style="font-size:12px; color:#8b949e; margin-left:6px;">max ${maxSlots}</span>
+        </td>
+        <td><input type="number" id="cab-first-${i}" min="1" placeholder="auto"
+            style="width:70px;" oninput="syncRange(${i})" /></td>
+        <td><input type="number" id="cab-last-${i}"  min="1" placeholder="auto"
+            style="width:70px;" oninput="syncRange(${i})" /></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('cabinetInputArea').classList.remove('hidden');
+    setStepState(2);
   }
   // ─────────────────────────────────────────────────────────────
 
@@ -2110,96 +2198,47 @@
     else if (v > max) el.value = max;
   }
 
-  function buildCabinetInputs() {
-    if (!buildComputeSlotMap()) return;
-    const n = parseInt(document.getElementById('numCabinets').value);
-    if (!n || n < 1 || n > 20) { alert('Please enter between 1 and 20 cabinets.'); return; }
-    const cabinetSize = parseInt(document.getElementById('cabinetSize').value);
-    const table = document.getElementById('cabinetGrid');
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th class="cab-num">#</th>
-          <th>Cabinet Name <span style="font-weight:400;color:#484f58;">(optional)</span></th>
-          <th>Number of Servers</th>
-          <th>First # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
-          <th>Last # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
-        </tr>
-      </thead>
-      <tbody id="cabinetTbody"></tbody>
-    `;
-    const tbody = table.querySelector('#cabinetTbody');
-    for (let i = 1; i <= n; i++) {
-      const maxSlots = computeSlotMap.length;
-      const defaultCount = maxSlots;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="cab-num" style="color:#58a6ff; font-weight:700;">C${i}</td>
-        <td><input type="text" id="cab-name-${i}" placeholder="e.g. Cabinet ${i}" style="width:180px;" /></td>
-        <td>
-          <input type="number" id="cab-count-${i}" min="0" max="${maxSlots}" value="${defaultCount}"
-            style="width:70px;" oninput="wrapCount(this, ${maxSlots})" />
-          <span style="font-size:12px; color:#8b949e; margin-left:6px;">max ${maxSlots}</span>
-        </td>
-        <td><input type="number" id="cab-first-${i}" min="1" placeholder="auto"
-            style="width:70px;" oninput="syncRange(${i})" /></td>
-        <td><input type="number" id="cab-last-${i}"  min="1" placeholder="auto"
-            style="width:70px;" oninput="syncRange(${i})" /></td>
-      `;
-      tbody.appendChild(tr);
-    }
-
-    document.getElementById('cabinetInputArea').classList.remove('hidden');
-    setStepState(2);
-  }
+  // Kept for applyConfig compat — delegates to showServerCountStep
+  function buildCabinetInputs() { showServerCountStep(); }
 
   // When First/Last change, auto-fill the count field
   function syncRange(i) {
     const firstEl = document.getElementById(`cab-first-${i}`);
     const lastEl  = document.getElementById(`cab-last-${i}`);
     const countEl = document.getElementById(`cab-count-${i}`);
-    const cabinetSize = parseInt(document.getElementById('cabinetSize').value);
+    const maxSlots = cabinetDefs[i - 1]?.slotMap.length || 0;
     const f = firstEl.value.trim() !== '' ? parseInt(firstEl.value) : null;
     const l = lastEl.value.trim()  !== '' ? parseInt(lastEl.value)  : null;
     if (f !== null && l !== null && l >= f) {
-      countEl.value = Math.min(l - f + 1, cabinetSize);
+      countEl.value = Math.min(l - f + 1, maxSlots);
     }
   }
 
   function collectData() {
-    const n = parseInt(document.getElementById('numCabinets').value);
-    const cabinetSize = parseInt(document.getElementById('cabinetSize').value);
     const cabinets = [];
-    let nextNum = 0; // sequential counter — follows on from previous cabinet
-
-    for (let i = 1; i <= n; i++) {
-      const nameEl  = document.getElementById(`cab-name-${i}`);
+    let nextNum = 0;
+    cabinetDefs.forEach((def, ci) => {
+      const i = ci + 1;
       const countEl = document.getElementById(`cab-count-${i}`);
       const firstEl = document.getElementById(`cab-first-${i}`);
       const lastEl  = document.getElementById(`cab-last-${i}`);
-
-      const cabName = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : `Cabinet ${i}`;
-      const fVal = firstEl && firstEl.value.trim() !== '' ? parseInt(firstEl.value) : null;
-      const lVal = lastEl  && lastEl.value.trim()  !== '' ? parseInt(lastEl.value)  : null;
-
+      const maxSlotsForCab = def.slotMap.length;
+      const fVal = firstEl?.value.trim() !== '' ? parseInt(firstEl.value) : null;
+      const lVal = lastEl?.value.trim()  !== '' ? parseInt(lastEl.value)  : null;
       let startNum, count;
-
-      const maxSlotsForCab = getSlotMap(i - 1).length;
       if (fVal !== null && lVal !== null && lVal >= fVal) {
-        // Explicit range provided
         startNum = fVal;
         count    = Math.min(lVal - fVal + 1, maxSlotsForCab);
-        nextNum  = fVal + count; // next sequential picks up after this range
+        nextNum  = fVal + count;
       } else {
-        // Sequential: follow on from previous cabinet
         const userCount = Math.min(parseInt(countEl?.value) || 0, maxSlotsForCab);
         count    = userCount;
         startNum = nextNum;
         nextNum  = startNum + count;
       }
-
-      cabinets.push({ name: cabName, count, startNum });
-    }
+      cabinets.push({ name: def.name, count, startNum });
+    });
+    const cabinetSize = cabinetDefs.reduce((m, d) => Math.max(m, d.height), 48);
     return { cabinets, cabinetSize };
   }
 
@@ -2333,12 +2372,12 @@
     const bar = document.getElementById('summaryBar');
     const manualCount = Object.keys(manualComputes).length;
     const totalServers = cabinets.reduce((s, c) => s + c.count, 0) + manualCount;
-    const totalU = cabinets.length * cabinetSize;
+    const totalU = cabinetDefs.reduce((s, d) => s + d.height, 0) || (cabinets.length * cabinetSize);
     const usedU = totalServers * 2;
     bar.innerHTML = `
       <div class="summary-pill">Cabinets: <strong>${cabinets.length}</strong></div>
       <div class="summary-pill">Total Servers: <strong>${totalServers}</strong></div>
-      <div class="summary-pill">Cabinet Size: <strong>${cabinetSize}U each</strong></div>
+      <div class="summary-pill">Cabinets defined: <strong>${cabinetDefs.length}</strong></div>
       <div class="summary-pill">Total Rack Space: <strong>${totalU}U</strong></div>
       <div class="summary-pill">Used: <strong>${usedU}U</strong></div>
       <div class="summary-pill">Available: <strong>${totalU - usedU}U</strong></div>
@@ -2364,10 +2403,11 @@
       const rack = document.createElement('div');
       rack.className = 'rack-h';
 
+      const cabHeight = cabinetDefs[ci]?.height || cabinetSize;
       rack.innerHTML = `
         <div class="rack-h-header">
           <span class="rack-name">🗄️ ${cab.name}</span>
-          <span class="rack-meta">${cab.count + Object.keys(manualComputes).filter(k => parseInt(k.split('-')[0]) === ci).length} servers / ${cabinetSize}U</span>
+          <span class="rack-meta">${cab.count + Object.keys(manualComputes).filter(k => parseInt(k.split('-')[0]) === ci).length} servers / ${cabHeight}U</span>
         </div>
         <div class="rack-h-slots" id="rack-slots-${ci}"></div>
       `;
@@ -2381,8 +2421,8 @@
       getSlotMap(ci).forEach(([b, t], idx) => { topUToIdx[t] = idx; bottomUs.add(b); });
       const TYPE_ABBR_MAP = { dismantle:'Dismantle', occupied:'Standard' };
 
-      // Render top → bottom (U48 … U1). Each compute occupies 2U at fixed positions.
-      for (let u = cabinetSize; u >= 1; u--) {
+      // Render top → bottom. Each compute occupies its defined U slots.
+      for (let u = cabHeight; u >= 1; u--) {
         // Bottom half of a 2U pair — already drawn when the top U was processed
         if (bottomUs.has(u)) continue;
 
@@ -2518,23 +2558,28 @@
     lines.push('SERVER CABINET ALLOCATION REPORT');
     lines.push('='.repeat(50));
     lines.push(`Generated: ${new Date().toLocaleString()}`);
-    lines.push(`Cabinet Size: ${cabinetSize}U`);
     lines.push('');
 
     cabinets.forEach((cab, ci) => {
+      const def = cabinetDefs[ci] || {};
+      const cabHeight = def.height || cabinetSize;
+      const slotMap   = def.slotMap || [];
       const endNum = cab.startNum + cab.count - 1;
-      lines.push(`CABINET ${ci + 1}: ${cab.name}`);
+      lines.push(`CABINET ${ci + 1}: ${cab.name}  (${cabHeight}U)`);
       lines.push('-'.repeat(40));
       if (cab.count === 0) {
         lines.push('  (no servers assigned)');
       } else {
-        lines.push(`  Servers: ${cab.startNum} – ${endNum}  (${cab.count} total, ${cab.count * 2}U used)`);
+        lines.push(`  Servers: ${cab.startNum} – ${endNum}  (${cab.count} total)`);
         for (let idx = 0; idx < cab.count; idx++) {
-          const [b, t] = computeSlotMap[idx];
-          lines.push(`  U${String(b).padStart(2)}-${String(t).padStart(2)}  →  Server ${cab.startNum + idx}`);
+          if (slotMap[idx]) {
+            const [b, t] = slotMap[idx];
+            lines.push(`  U${String(b).padStart(2)}-${String(t).padStart(2)}  →  Server ${cab.startNum + idx}`);
+          }
         }
       }
-      lines.push(`  Empty rack space: ${cabinetSize - cab.count * 2}U`);
+      const usedU = slotMap.slice(0, cab.count).reduce((s, [b, t]) => s + (t - b + 1), 0);
+      lines.push(`  Empty rack space: ${cabHeight - usedU}U`);
       lines.push('');
     });
     document.getElementById('exportText').textContent = lines.join('\n');
@@ -2546,25 +2591,18 @@
   }
 
   function backToConfig() {
-    // Sync manually-added computes into the Number of Servers inputs.
-    // Only count entries genuinely beyond the current sequential range to prevent
-    // double-counting on repeated back/forth trips.
-    const n = parseInt(document.getElementById('numCabinets').value) || 0;
-    for (let i = 1; i <= n; i++) {
-      const ci = i - 1;
+    cabinetDefs.forEach((def, ci) => {
+      const i = ci + 1;
       const el = document.getElementById(`cab-count-${i}`);
-      if (!el) continue;
+      if (!el) return;
       const userCount = parseInt(el.value) || 0;
-      // seqCount = actual number of sequential slots collectData() produces for this cabinet
       const seqCount = userCount;
       const manualForCab = Object.keys(manualComputes).filter(k => {
         const [kci, kidx] = k.split('-');
         return parseInt(kci) === ci && parseInt(kidx) >= seqCount;
       }).length;
       if (manualForCab > 0) el.value = userCount + manualForCab;
-    }
-    // Keep manualComputes intact so the Remove button remains available
-    // for any entries still beyond the sequential range on return to step 3.
+    });
     document.getElementById('layoutSection').classList.add('hidden');
     document.getElementById('configSection').classList.remove('hidden');
     setStepState(2);
@@ -2573,17 +2611,20 @@
   function resetAll() {
     hasGeneratedBefore = false;
     userAddedSlots = new Set();
+    cabinetDefs = [];
+    computeSlotMap = [];
     document.getElementById('layoutSection').classList.add('hidden');
     document.getElementById('cabinetInputArea').classList.add('hidden');
     document.getElementById('configSection').classList.remove('hidden');
+    document.getElementById('cabinetListSection').classList.add('hidden');
+    document.getElementById('cabinetListEl').innerHTML = '';
     document.getElementById('cabinetGrid').innerHTML = '';
     document.getElementById('layoutGrid').innerHTML = '';
     document.getElementById('siteNameDisplay').style.display = 'none';
-    document.getElementById('numCabinets').value = 6;
-    document.getElementById('cabinetSize').value = 48;
-    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
+    document.getElementById('newCabName').value = '';
+    document.getElementById('newCabHeight').value = 48;
+    _csdRows = [{ startU: '', uSize: 2, isLast: false }];
     renderCsdRows();
-    computeSlotMap = [];
     vm1Assignments = {};
     haAssignments  = {};
     vm1Committed   = false;
@@ -2613,7 +2654,7 @@
   }
 
   // initialise
-  _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
+  _csdRows = [{ startU: '', uSize: 2, isLast: false }];
   renderCsdRows();
   setStepState(1);
 
@@ -2621,29 +2662,19 @@
 
   // ── Save config → browser "Save As" dialog ───────────────────
   function buildConfigObject() {
-    const n = parseInt(document.getElementById('numCabinets').value) || 6;
-    const cabinetSize = parseInt(document.getElementById('cabinetSize').value) || 12;
-    const cabinets = [];
-    if (!document.getElementById('cabinetInputArea').classList.contains('hidden')) {
-      for (let i = 1; i <= n; i++) {
-        const nameEl  = document.getElementById(`cab-name-${i}`);
-        const countEl = document.getElementById(`cab-count-${i}`);
-        const firstEl = document.getElementById(`cab-first-${i}`);
-        const lastEl  = document.getElementById(`cab-last-${i}`);
-        cabinets.push({
-          name:  nameEl  ? nameEl.value.trim()  : '',
-          count: countEl ? countEl.value         : '10',
-          first: firstEl ? firstEl.value.trim()  : '',
-          last:  lastEl  ? lastEl.value.trim()   : ''
-        });
-      }
-    }
+    const serverCounts = cabinetDefs.map((def, ci) => {
+      const i = ci + 1;
+      return {
+        count: document.getElementById(`cab-count-${i}`)?.value || String(def.slotMap.length),
+        first: document.getElementById(`cab-first-${i}`)?.value.trim() || '',
+        last:  document.getElementById(`cab-last-${i}`)?.value.trim()  || '',
+      };
+    });
     return {
       siteName:       document.getElementById('siteName').value.trim(),
-      numCabinets:    n,
-      cabinetSize,
+      cabinetDefs:    cabinetDefs.map(d => ({ name: d.name, height: d.height, slotMap: d.slotMap.map(e => [...e]) })),
       computeSlotDef: _csdRows.map(r => ({ ...r })),
-      cabinets,
+      serverCounts,
       attrs: {
         dismantle: document.getElementById('dismantleInput').value,
       },
@@ -2721,33 +2752,36 @@
   }
 
   function applyConfig(config) {
-    document.getElementById('siteName').value    = config.siteName    || '';
-    document.getElementById('numCabinets').value = config.numCabinets || 6;
-    document.getElementById('cabinetSize').value = config.cabinetSize || 48;
+    document.getElementById('siteName').value = config.siteName || '';
 
-    // Restore compute slot definition rows
+    // Restore cabinet definitions
+    if (config.cabinetDefs && config.cabinetDefs.length) {
+      cabinetDefs = config.cabinetDefs.map(d => ({
+        name: d.name, height: d.height,
+        slotMap: (d.slotMap || []).map(e => [...e])
+      }));
+      renderCabinetList();
+    }
+
+    // Restore compute slot definition (for the builder form)
     if (config.computeSlotDef && config.computeSlotDef.length) {
       _csdRows = config.computeSlotDef.map(r => ({ ...r }));
-      // Ensure at least the last row is marked "last" so buildComputeSlotMap works
-      if (!_csdRows.some(r => r.isLast)) _csdRows[_csdRows.length - 1].isLast = true;
       renderCsdRows();
     }
 
-    buildCabinetInputs();
+    showServerCountStep();
 
-    if (config.cabinets && config.cabinets.length) {
-      config.cabinets.forEach((cab, idx) => {
-        const i = idx + 1;
-        const nameEl  = document.getElementById(`cab-name-${i}`);
-        const countEl = document.getElementById(`cab-count-${i}`);
-        const firstEl = document.getElementById(`cab-first-${i}`);
-        const lastEl  = document.getElementById(`cab-last-${i}`);
-        if (nameEl)  nameEl.value  = cab.name  || '';
-        if (countEl) countEl.value = cab.count  || '10';
-        if (firstEl) firstEl.value = cab.first  || '';
-        if (lastEl)  lastEl.value  = cab.last   || '';
-      });
-    }
+    // Restore server counts
+    const counts = config.serverCounts || config.cabinets || [];
+    counts.forEach((sc, idx) => {
+      const i = idx + 1;
+      const countEl = document.getElementById(`cab-count-${i}`);
+      const firstEl = document.getElementById(`cab-first-${i}`);
+      const lastEl  = document.getElementById(`cab-last-${i}`);
+      if (countEl) countEl.value = sc.count || '';
+      if (firstEl) firstEl.value = sc.first || '';
+      if (lastEl)  lastEl.value  = sc.last  || '';
+    });
 
     if (config.attrs) {
       document.getElementById('dismantleInput').value = config.attrs.dismantle || '';
