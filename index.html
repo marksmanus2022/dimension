@@ -2459,7 +2459,7 @@
       // Build lookup: topU → compute index (0-based), bottomUs to skip
       const topUToIdx = {};
       const bottomUs  = new Set();
-      getSlotMap(ci).forEach(([b, t], idx) => { topUToIdx[t] = idx; bottomUs.add(b); });
+      getSlotMap(ci).forEach(([b, t], idx) => { topUToIdx[t] = idx; if (b !== t) bottomUs.add(b); });
       const TYPE_ABBR_MAP = { dismantle:'Dismantle', occupied:'Standard' };
 
       // Render top → bottom. Each compute occupies its defined U slots.
@@ -2481,7 +2481,8 @@
 
         if (hasCompute) {
           const serverNum = (computeIdx < cab.count) ? cab.startNum + computeIdx : manualNum;
-          const bottomU   = computeSlotMap[computeIdx][0];
+          const [bottomU, topU] = getSlotMap(ci)[computeIdx];
+          const uSize  = topU - bottomU + 1;
           const barCls = dismantleSet.has(serverNum) ? 'dismantle' : 'occupied';
           const numCls = barCls;
           const tags = [];
@@ -2489,7 +2490,8 @@
           row.className     = 'slot-row';
           label.className   = `slot-label ${numCls}`;
           label.textContent = serverNum;
-          slot.className    = `rack-slot slot-2u ${barCls}${selectedNums.has(serverNum) ? ' selected' : ''}`;
+          slot.className    = `rack-slot ${barCls}${selectedNums.has(serverNum) ? ' selected' : ''}`;
+          slot.style.height = (uSize * 16 - 3) + 'px';
           slot.dataset.num  = serverNum;
           slot.title        = `Server ${serverNum}${tags.length ? ' [' + tags.join(', ') + ']' : ''} — ${cab.name}, U${bottomU}-${u}`;
           slot.onclick      = e => {
@@ -2551,12 +2553,14 @@
             }
           }
         } else if (is2USlot) {
-          // 2U compute position exists in layout but no compute assigned here
-          const bottomU = computeSlotMap[computeIdx][0];
+          // Compute position exists in layout but no compute assigned here
+          const [bottomU, topU] = getSlotMap(ci)[computeIdx];
+          const uSize  = topU - bottomU + 1;
           row.className     = 'slot-row';
           label.className   = 'slot-label empty';
           label.textContent = `${bottomU}`;
-          slot.className    = 'rack-slot slot-2u empty';
+          slot.className    = 'rack-slot empty';
+          slot.style.height = (uSize * 16 - 3) + 'px';
           slot.title        = `Empty — ${cab.name}, U${bottomU}-${u} (click to add device)`;
           slot.style.cursor = 'pointer';
           slot.onclick      = e => openAddDevicePopup(ci, u, cab.name, true, computeIdx, e.clientX, e.clientY);
