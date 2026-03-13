@@ -1139,7 +1139,16 @@
   }
 
   function addComputeRow() {
-    _csdRows.push({ startU: '', uSize: 2, isLast: false });
+    let defaultStart;
+    if (_csdRows.length === 0) {
+      defaultStart = 1;
+    } else {
+      const prev = _csdRows[_csdRows.length - 1];
+      const prevStart = parseInt(prev.startU) || 0;
+      const prevSize  = Math.max(1, parseInt(prev.uSize) || 1);
+      defaultStart = prevStart + prevSize;
+    }
+    _csdRows.push({ startU: defaultStart, uSize: 2, isLast: false });
     renderCsdRows();
   }
 
@@ -1194,7 +1203,7 @@
     // Reset form for next cabinet
     document.getElementById('newCabName').value = '';
     document.getElementById('copyFromSelect').value = '';
-    _csdRows = [{ startU: '', uSize: 2, isLast: false }];
+    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
     renderCsdRows();
   }
 
@@ -2660,7 +2669,7 @@
     document.getElementById('siteNameDisplay').style.display = 'none';
     document.getElementById('newCabName').value = '';
     document.getElementById('newCabHeight').value = 48;
-    _csdRows = [{ startU: '', uSize: 2, isLast: false }];
+    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
     renderCsdRows();
     vm1Assignments = {};
     haAssignments  = {};
@@ -2691,7 +2700,7 @@
   }
 
   // initialise
-  _csdRows = [{ startU: '', uSize: 2, isLast: false }];
+  _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
   renderCsdRows();
   setStepState(1);
 
