@@ -1607,7 +1607,7 @@
     const { ci, u } = _adpState;
     if (!cabSwitches[ci]) cabSwitches[ci] = {};
     const total = Object.values(cabSwitches).reduce((s, m) => s + Object.keys(m).length, 0);
-    cabSwitches[ci][u] = `SW-${total + 1}`;
+    cabSwitches[ci][u] = { label: `SW-${total + 1}`, uSize: 1 };
     adpClose();
     rerenderRacks();
   }
@@ -2234,12 +2234,24 @@
       const topUToIdx = {};
       const bottomUs  = new Set();
       getSlotMap(ci).forEach(([b, t], idx) => { topUToIdx[t] = idx; if (b !== t) bottomUs.add(b); });
+
+      // Build switch lookup: topU → { label, uSize }, bottomSwitchUs to skip
+      const switchAtTopU  = {};
+      const bottomSwitchUs = new Set();
+      Object.entries(cabSwitches[ci] || {}).forEach(([uStr, sw]) => {
+        const topU  = parseInt(uStr);
+        const uSize = (typeof sw === 'object') ? sw.uSize : 1;
+        const label = (typeof sw === 'object') ? sw.label : sw;
+        switchAtTopU[topU] = { label, uSize };
+        for (let bu = topU - uSize + 1; bu < topU; bu++) bottomSwitchUs.add(bu);
+      });
+
       const TYPE_ABBR_MAP = { dismantle:'Dismantle', occupied:'Standard' };
 
       // Render top → bottom. Each compute occupies its defined U slots.
       for (let u = cabHeight; u >= 1; u--) {
-        // Bottom half of a 2U pair — already drawn when the top U was processed
-        if (bottomUs.has(u)) continue;
+        // Skip bottom U rows already covered by a multi-U compute or switch
+        if (bottomUs.has(u) || bottomSwitchUs.has(u)) continue;
 
         const row   = document.createElement('div');
         const label = document.createElement('span');
@@ -2289,17 +2301,18 @@
           slot.style.cursor = 'pointer';
           slot.onclick      = e => openAddDevicePopup(ci, u, cab.name, true, computeIdx, e.clientX, e.clientY);
         } else {
-          // Regular 1U slot — may have a manually added switch
-          const sw = cabSwitches[ci] && cabSwitches[ci][u];
+          const sw = switchAtTopU[u];
           row.className     = 'slot-row';
           label.className   = 'slot-label empty';
-          label.textContent = u;
           if (sw) {
-            slot.className  = 'rack-slot switch-device';
-            slot.title      = `${sw} — ${cab.name}, U${u}`;
-            const swLabel   = document.createElement('span');
+            const bottomU = u - sw.uSize + 1;
+            label.textContent = bottomU;
+            slot.className    = 'rack-slot switch-device';
+            slot.style.height = (sw.uSize * 16 - 3) + 'px';
+            slot.title        = `${sw.label} — ${cab.name}, U${bottomU}-U${u}`;
+            const swLabel     = document.createElement('span');
             swLabel.className   = 'switch-slot-label';
-            swLabel.textContent = `🔀 ${sw}`;
+            swLabel.textContent = `🔀 ${sw.label}`;
             const removeBtn = document.createElement('button');
             removeBtn.className   = 'switch-remove-btn';
             removeBtn.textContent = '×';
@@ -2308,10 +2321,11 @@
             slot.appendChild(swLabel);
             slot.appendChild(removeBtn);
           } else {
-            slot.className  = 'rack-slot empty';
-            slot.title      = `U${u} — ${cab.name} (click to add device)`;
+            label.textContent = u;
+            slot.className    = 'rack-slot empty';
+            slot.title        = `U${u} — ${cab.name} (click to add device)`;
             slot.style.cursor = 'pointer';
-            slot.onclick    = e => openAddDevicePopup(ci, u, cab.name, false, undefined, e.clientX, e.clientY);
+            slot.onclick      = e => openAddDevicePopup(ci, u, cab.name, false, undefined, e.clientX, e.clientY);
           }
         }
 
@@ -3303,15 +3317,23 @@
   }
   // ── Switch YAML Load ──────────────────────────────────────────
   const SAMPLE_SWITCH_YAML = `switches:
-  - shelf_id: 1
-    slot: 1
-    name: SW-Core-1
-  - shelf_id: 1
-    slot: 2
-    name: SW-Access-1
-  - shelf_id: 2
-    slot: 1
-    name: SW-Core-2
+  - id: 1
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 10
+      - id: 2
+        size: 2
+        slot: 12
+
+  - id: 2
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 10
+      - id: 2
+        size: 2
+        slot: 12
 `;
 
   function downloadSampleSwitchYaml() {
@@ -3355,10 +3377,9 @@
       return;
     }
 
-    // Build a map from shelf id → cabinet index
+    // Build shelf id → cabinet index map
     const shelfIdToCi = {};
     cabinetDefs.forEach((def, ci) => {
-      // cabinetDefs names are "Shelf N" — extract the id
       const match = def.name.match(/Shelf\s+(\S+)/i);
       if (match) shelfIdToCi[match[1]] = ci;
     });
@@ -3366,19 +3387,27 @@
     cabSwitches = {};
     let count = 0;
     const warnings = [];
-    data.switches.forEach(sw => {
-      const shelfId = String(sw.shelf_id ?? '');
+
+    data.switches.forEach(entry => {
+      const shelfId = String(entry.id ?? '');
       const ci = shelfIdToCi[shelfId];
       if (ci === undefined) {
-        warnings.push(`shelf_id "${shelfId}" not found — skipped.`);
+        warnings.push(`Shelf id "${shelfId}" not found — skipped.`);
         return;
       }
-      const u = parseInt(sw.slot);
-      if (!u || u < 1) { warnings.push(`Invalid slot "${sw.slot}" — skipped.`); return; }
-      const label = (sw.name || `SW-${count + 1}`).trim();
-      if (!cabSwitches[ci]) cabSwitches[ci] = {};
-      cabSwitches[ci][u] = label;
-      count++;
+      const cabHeight = cabinetDefs[ci].height;
+      const devices = Array.isArray(entry.Cabinet) ? entry.Cabinet : [];
+      devices.forEach(dev => {
+        const startU = parseInt(dev.slot);
+        const uSize  = Math.max(1, parseInt(dev.size) || 1);
+        const topU   = startU + uSize - 1;
+        if (!startU || startU < 1) { warnings.push(`Invalid slot "${dev.slot}" in shelf ${shelfId} — skipped.`); return; }
+        if (topU > cabHeight) { warnings.push(`Switch U${startU}-U${topU} exceeds shelf ${shelfId} height (${cabHeight}U) — skipped.`); return; }
+        const label = `SW-${shelfId}-${dev.id ?? (count + 1)}`;
+        if (!cabSwitches[ci]) cabSwitches[ci] = {};
+        cabSwitches[ci][topU] = { label, uSize };
+        count++;
+      });
     });
 
     const statusEl = document.getElementById('switchYamlStatus');
