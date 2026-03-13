@@ -3340,7 +3340,7 @@
     const blob = new Blob([SAMPLE_SWITCH_YAML], { type: 'text/yaml' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'sample-switch-layout.yaml';
+    a.download = 'switch.yaml';
     a.click();
     URL.revokeObjectURL(a.href);
   }
