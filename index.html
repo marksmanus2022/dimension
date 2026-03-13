@@ -3478,8 +3478,9 @@
         const uSize  = Math.max(1, parseInt(c.size) || 1);
         return [startU, startU + uSize - 1];
       });
-      // Cabinet height = highest topU across all compute slots
-      const height = slotMap.reduce((m, [, t]) => Math.max(m, t), 8);
+      // Cabinet height: use explicit YAML field if present, otherwise infer from highest topU
+      const height = shelf.height ? Math.max(parseInt(shelf.height), slotMap.reduce((m, [, t]) => Math.max(m, t), 1))
+                                  : slotMap.reduce((m, [, t]) => Math.max(m, t), 8);
       cabinetDefs.push({ name, height, slotMap });
     });
 
