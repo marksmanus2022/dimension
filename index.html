@@ -123,6 +123,35 @@
     .btn-save:hover { background: #1f4d7a; }
     .btn-save.saved { background: #1a3a24; color: #3fb950; border-color: #3fb950; }
 
+    /* Compute slot definition rows */
+    .csd-section { margin-top: 20px; }
+    .csd-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #8b949e; margin-bottom: 10px; }
+    .csd-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px; padding: 8px 12px;
+      background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+    }
+    .csd-row label { font-size: 11px; color: #8b949e; flex-shrink: 0; }
+    .csd-row input[type="number"] {
+      width: 60px; background: #0d1117; border: 1px solid #30363d;
+      border-radius: 4px; color: #e6edf3; font-size: 13px; font-weight: 600;
+      padding: 4px 8px; text-align: center;
+    }
+    .csd-row input[type="number"]:focus { outline: none; border-color: #388bfd; }
+    .csd-index { font-size: 12px; font-weight: 700; color: #58a6ff; min-width: 28px; }
+    .csd-last-label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #3fb950; cursor: pointer;
+      margin-left: auto; flex-shrink: 0;
+    }
+    .csd-last-label input[type="checkbox"] { cursor: pointer; accent-color: #3fb950; }
+    .csd-remove {
+      background: transparent; border: 1px solid #444; border-radius: 4px;
+      color: #888; font-size: 13px; cursor: pointer; padding: 2px 8px; flex-shrink: 0;
+    }
+    .csd-remove:hover { border-color: #f85149; color: #f85149; }
+    #csdProceedBtn { display: none; }
+
     /* Cabinet server-count table */
     .cab-icon { font-size: 18px; }
 
@@ -755,33 +784,31 @@
     <div class="card">
       <h2>Step 1 — Cabinet Configuration</h2>
       <p>Enter the number of cabinets you want to deploy, then specify the servers for each cabinet.</p>
-      <div style="display:flex; align-items:flex-start; gap:32px; flex-wrap:wrap;">
-        <!-- Left: controls -->
-        <div>
-          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-            <div>
-              <label for="siteName">Site Name</label>
-              <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:200px;" />
-            </div>
-            <div>
-              <label for="numCabinets">Number of Cabinets</label>
-              <input type="number" id="numCabinets" min="1" max="20" value="6" />
-            </div>
-            <div>
-              <label for="cabinetSize">Cabinet Size (U)</label>
-              <select id="cabinetSize">
-                <option value="12">12U</option>
-                <option value="24">24U</option>
-                <option value="42">42U (Standard)</option>
-                <option value="48" selected>48U</option>
-              </select>
-            </div>
-            <div style="padding-top:20px;">
-              <button class="btn btn-blue" onclick="buildCabinetInputs()">&#9654; Set Cabinets</button>
-            </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <div>
+            <label for="siteName">Site Name</label>
+            <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:200px;" />
+          </div>
+          <div>
+            <label for="numCabinets">Number of Cabinets</label>
+            <input type="number" id="numCabinets" min="1" max="20" value="6" />
+          </div>
+          <div>
+            <label for="cabinetSize">Cabinet Height (U)</label>
+            <input type="number" id="cabinetSize" min="1" max="200" value="48" style="width:90px;" />
           </div>
         </div>
 
+        <!-- Compute slot definition -->
+        <div class="csd-section">
+          <div class="csd-title">Compute Slot Positions</div>
+          <div id="csdRows"></div>
+          <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="addComputeRow()">&#43; Add Compute Slot</button>
+            <button class="btn btn-blue" id="csdProceedBtn" onclick="buildCabinetInputs()">&#9654; Set Cabinets</button>
+          </div>
+        </div>
       </div>
 
       <!-- Save / Load -->
@@ -1056,13 +1083,88 @@
 
 <script>
 
-  // ── Fixed 2U slot positions per compute in a 48U cabinet ────
-  // Each pair is [bottomU, topU]. Compute index 0 → first pair, etc.
-  const COMPUTE_SLOT_MAP = [
-    [4,5],[7,8],[10,11],[13,14],[16,17],[19,20],
-    [26,27],[29,30],[32,33],[35,36],[38,39]
-  ];
-  function getSlotMap(ci) { return COMPUTE_SLOT_MAP; }
+  // ── Compute slot map — built dynamically from user input ────
+  // Each entry is [bottomU, topU]. Compute index 0 → first entry, etc.
+  let computeSlotMap = [];
+  function getSlotMap(ci) { return computeSlotMap; }
+
+  // ── Compute Slot Definition (Step 1 UI) ──────────────────────
+  // Each row: { startU: number|'', uSize: number, isLast: boolean }
+  let _csdRows = [];
+
+  function renderCsdRows() {
+    const container = document.getElementById('csdRows');
+    if (!container) return;
+    container.innerHTML = '';
+    _csdRows.forEach((r, idx) => {
+      const div = document.createElement('div');
+      div.className = 'csd-row';
+      div.innerHTML = `
+        <span class="csd-index">C${idx + 1}</span>
+        <label>Start&nbsp;U</label>
+        <input type="number" id="csd-start-${idx}" min="1" value="${r.startU !== '' ? r.startU : ''}"
+               placeholder="${idx * 2 + 1}" oninput="_csdRows[${idx}].startU = this.value !== '' ? +this.value : ''" />
+        <label>U&nbsp;Size</label>
+        <input type="number" id="csd-size-${idx}" min="1" max="20" value="${r.uSize}"
+               oninput="_csdRows[${idx}].uSize = Math.max(1, +this.value || 1)" />
+        <button class="csd-remove" onclick="removeComputeRow(${idx})" title="Remove this slot">&#215;</button>
+        <label class="csd-last-label">
+          <input type="checkbox" ${r.isLast ? 'checked' : ''} onchange="onLastComputeToggle(${idx}, this.checked)" />
+          Last
+        </label>
+      `;
+      container.appendChild(div);
+    });
+    const hasLast = _csdRows.some(r => r.isLast);
+    const btn = document.getElementById('csdProceedBtn');
+    if (btn) btn.style.display = (hasLast && _csdRows.length > 0) ? '' : 'none';
+  }
+
+  function addComputeRow() {
+    _csdRows.push({ startU: '', uSize: 2, isLast: false });
+    renderCsdRows();
+  }
+
+  function removeComputeRow(idx) {
+    _csdRows.splice(idx, 1);
+    renderCsdRows();
+  }
+
+  function onLastComputeToggle(idx, checked) {
+    // Only one row can be "last" at a time
+    _csdRows.forEach((r, i) => { r.isLast = (i === idx) ? checked : false; });
+    renderCsdRows();
+  }
+
+  function buildComputeSlotMap() {
+    if (_csdRows.length === 0) {
+      alert('Please define at least one compute slot position.');
+      return false;
+    }
+    const lastIdx = _csdRows.findIndex(r => r.isLast);
+    const endIdx  = lastIdx >= 0 ? lastIdx : _csdRows.length - 1;
+    const cabinetH = parseInt(document.getElementById('cabinetSize').value) || 48;
+    const result = [];
+    for (let i = 0; i <= endIdx; i++) {
+      const r = _csdRows[i];
+      const startU = parseInt(r.startU);
+      const uSize  = Math.max(1, parseInt(r.uSize) || 1);
+      if (!startU || startU < 1) {
+        alert(`Compute ${i + 1}: Start U must be a number ≥ 1.`);
+        return false;
+      }
+      const bottomU = startU;
+      const topU    = startU + uSize - 1;
+      if (topU > cabinetH) {
+        alert(`Compute ${i + 1}: U${startU}–U${topU} exceeds cabinet height (${cabinetH}U).`);
+        return false;
+      }
+      result.push([bottomU, topU]);
+    }
+    computeSlotMap = result;
+    return true;
+  }
+  // ─────────────────────────────────────────────────────────────
 
   function refreshAttrCache() {
     // No domain-specific caches needed
@@ -2009,6 +2111,7 @@
   }
 
   function buildCabinetInputs() {
+    if (!buildComputeSlotMap()) return;
     const n = parseInt(document.getElementById('numCabinets').value);
     if (!n || n < 1 || n > 20) { alert('Please enter between 1 and 20 cabinets.'); return; }
     const cabinetSize = parseInt(document.getElementById('cabinetSize').value);
@@ -2027,7 +2130,7 @@
     `;
     const tbody = table.querySelector('#cabinetTbody');
     for (let i = 1; i <= n; i++) {
-      const maxSlots = COMPUTE_SLOT_MAP.length;
+      const maxSlots = computeSlotMap.length;
       const defaultCount = maxSlots;
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -2297,7 +2400,7 @@
 
         if (hasCompute) {
           const serverNum = (computeIdx < cab.count) ? cab.startNum + computeIdx : manualNum;
-          const bottomU   = COMPUTE_SLOT_MAP[computeIdx][0];
+          const bottomU   = computeSlotMap[computeIdx][0];
           const barCls = dismantleSet.has(serverNum) ? 'dismantle' : 'occupied';
           const numCls = barCls;
           const tags = [];
@@ -2368,7 +2471,7 @@
           }
         } else if (is2USlot) {
           // 2U compute position exists in layout but no compute assigned here
-          const bottomU = COMPUTE_SLOT_MAP[computeIdx][0];
+          const bottomU = computeSlotMap[computeIdx][0];
           row.className     = 'slot-row';
           label.className   = 'slot-label empty';
           label.textContent = `${bottomU}`;
@@ -2427,7 +2530,7 @@
       } else {
         lines.push(`  Servers: ${cab.startNum} – ${endNum}  (${cab.count} total, ${cab.count * 2}U used)`);
         for (let idx = 0; idx < cab.count; idx++) {
-          const [b, t] = COMPUTE_SLOT_MAP[idx];
+          const [b, t] = computeSlotMap[idx];
           lines.push(`  U${String(b).padStart(2)}-${String(t).padStart(2)}  →  Server ${cab.startNum + idx}`);
         }
       }
@@ -2477,6 +2580,10 @@
     document.getElementById('layoutGrid').innerHTML = '';
     document.getElementById('siteNameDisplay').style.display = 'none';
     document.getElementById('numCabinets').value = 6;
+    document.getElementById('cabinetSize').value = 48;
+    _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
+    renderCsdRows();
+    computeSlotMap = [];
     vm1Assignments = {};
     haAssignments  = {};
     vm1Committed   = false;
@@ -2506,6 +2613,8 @@
   }
 
   // initialise
+  _csdRows = [{ startU: 1, uSize: 2, isLast: false }];
+  renderCsdRows();
   setStepState(1);
 
   // ── Save / Load ───────────────────────────────────────────────
@@ -2530,9 +2639,10 @@
       }
     }
     return {
-      siteName:    document.getElementById('siteName').value.trim(),
-      numCabinets: n,
+      siteName:       document.getElementById('siteName').value.trim(),
+      numCabinets:    n,
       cabinetSize,
+      computeSlotDef: _csdRows.map(r => ({ ...r })),
       cabinets,
       attrs: {
         dismantle: document.getElementById('dismantleInput').value,
@@ -2613,7 +2723,15 @@
   function applyConfig(config) {
     document.getElementById('siteName').value    = config.siteName    || '';
     document.getElementById('numCabinets').value = config.numCabinets || 6;
-    document.getElementById('cabinetSize').value = config.cabinetSize || 12;
+    document.getElementById('cabinetSize').value = config.cabinetSize || 48;
+
+    // Restore compute slot definition rows
+    if (config.computeSlotDef && config.computeSlotDef.length) {
+      _csdRows = config.computeSlotDef.map(r => ({ ...r }));
+      // Ensure at least the last row is marked "last" so buildComputeSlotMap works
+      if (!_csdRows.some(r => r.isLast)) _csdRows[_csdRows.length - 1].isLast = true;
+      renderCsdRows();
+    }
 
     buildCabinetInputs();
 
@@ -2966,7 +3084,7 @@
     // ── Slot rows — one row per U, 2U computes merge two rows ──
     // xlsBottomUs = union across all cabinets (drives row-skip logic)
     const xlsBottomUs  = new Set();
-    COMPUTE_SLOT_MAP.forEach(([b]) => xlsBottomUs.add(b));
+    computeSlotMap.forEach(([b]) => xlsBottomUs.add(b));
     // Per-cabinet U→computeIdx lookup
     const perCabTopUToIdx = cabinets.map((_, ci) => {
       const m = {};
@@ -3013,7 +3131,7 @@
         continue;
       }
 
-      const is2UPos = COMPUTE_SLOT_MAP.some(([,t]) => t === u); // top of a 2U pair in any cab
+      const is2UPos = computeSlotMap.some(([,t]) => t === u); // top of a 2U pair in any cab
 
       cabinets.forEach((cab, i) => {
         const uc = cabUColOf(i);
@@ -3058,7 +3176,7 @@
             vmLCell.border    = THIN;
             vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
             vmRCell.border    = THIN;
-            // For 1U computes (not in COMPUTE_SLOT_MAP — edge case), merge now
+            // For 1U computes (not in computeSlotMap — edge case), merge now
             if (!is2UPos) ws.mergeCells(rowNum, vl, rowNum, vr);
           } else {
             // Has VM(s) — left and right stay separate
