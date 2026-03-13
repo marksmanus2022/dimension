@@ -282,23 +282,9 @@
     .vm-flash { animation: vm-flash 0.55s ease-out; }
     .rack-slot.empty    { background: #0d1117; border-color: #21262d; }
     .rack-slot.occupied { background: #1e2530; border-color: #c9d1d9; }
-    .rack-slot.sriov      { background: #002a2e; border-color: #19edff; }
-    .rack-slot.wmg        { background: #2a2a00; border-color: #ffff33; }
-    .rack-slot.oam        { background: #2a1500; border-color: #ffb570; }
-    .rack-slot.controller { background: #0d2a15; border-color: #36c459; }
-    .rack-slot.rte        { background: #0a1a35; border-color: #1952ae; }
-    .rack-slot.kickstart  { background: #2a0800; border-color: #ff6633; }
     .rack-slot.dismantle  { background: #1a1a1a; border-color: #666677; }
 
-    /* Gold CPU only colours the number — no rack-slot.gold class needed */
-    .slot-label.gold       { color: #ff00ff;  font-size: 13px; font-weight: 800; }
     .slot-label.occupied   { color: #ffffff;  font-size: 13px; font-weight: 800; }
-    .slot-label.sriov      { color: #19edff;  font-size: 13px; font-weight: 800; }
-    .slot-label.wmg        { color: #ffff33;  font-size: 13px; font-weight: 800; }
-    .slot-label.oam        { color: #ffb570;  font-size: 13px; font-weight: 800; }
-    .slot-label.controller { color: #36c459;  font-size: 13px; font-weight: 800; }
-    .slot-label.rte        { color: #4a7fd4;  font-size: 13px; font-weight: 800; }
-    .slot-label.kickstart  { color: #ff6633;  font-size: 13px; font-weight: 800; }
     .slot-label.dismantle  { color: #888899;  font-size: 13px; font-weight: 800; }
 
     .group-input-row {
@@ -337,12 +323,6 @@
       transition: opacity 0.15s, transform 0.1s;
     }
     .attr-btn:active { transform: scale(0.95); }
-    .attr-rte        { background: #0a1a35; border-color: #1952ae; color: #4a7fd4; }
-    .attr-controller { background: #0d2a15; border-color: #36c459; color: #36c459; }
-    .attr-oam        { background: #2a1500; border-color: #ffb570; color: #ffb570; }
-    .attr-sriov      { background: #002a2e; border-color: #19edff; color: #19edff; }
-    .attr-wmg        { background: #2a2a00; border-color: #ffff33; color: #ffff33; }
-    .attr-gold       { background: #2a002a; border-color: #ff00ff; color: #ff00ff; }
 
     /* VM allocation sidebar */
     .rack-and-vm-wrap {
@@ -684,16 +664,9 @@
       .rack-h          { border-color: #aaa !important; width: 293px !important; background: #fff !important; overflow: visible !important; }
       .rack-h-header   { background: #eee !important; color: #000 !important; border-color: #aaa !important; }
       .rack-slot.occupied    { background: #d0e8ff !important; border-color: #1f6feb !important; }
-      .rack-slot.sriov       { background: #ccfffe !important; border-color: #19edff !important; }
-      .rack-slot.wmg         { background: #ffffc8 !important; border-color: #aaaa00 !important; }
-      .rack-slot.oam         { background: #ffe8cc !important; border-color: #cc7a30 !important; }
-      .rack-slot.controller  { background: #ccffd4 !important; border-color: #36c459 !important; }
-      .rack-slot.rte         { background: #ccdcff !important; border-color: #1952ae !important; }
-      .rack-slot.kickstart   { background: #ffe0d4 !important; border-color: #ff6633 !important; }
       .rack-slot.dismantle   { background: #e0e0e4 !important; border-color: #888899 !important; }
       .rack-slot.empty       { background: #f5f5f5 !important; border-color: #ddd !important; }
       .slot-label            { color: #333 !important; }
-      .slot-label.gold       { color: #aa00aa !important; }
       .vm-sidebar      { border-color: #aaa !important; background: #f5f5f5 !important; width: auto !important; }
       .vm-sidebar-title{ color: #1f6feb !important; border-color: #ccc !important; }
       .vm-slot-label   { color: #000 !important; }
@@ -809,33 +782,6 @@
           </div>
         </div>
 
-        <!-- Right: allocation principles -->
-        <div style="flex:1; min-width:320px; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:16px 20px;">
-          <div style="font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#58a6ff; margin-bottom:12px;">Allocation Principles</div>
-          <ol style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px;">
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#ff6633; font-weight:700;">Kickstart</span> — Always compute 0 in Cabinet 1. Auto-designated on layout generation. Kickstart computes <em>cannot</em> host VMs.
-            </li>
-            <li style="font-size:12px; color:#4a7fd4; line-height:1.5;">
-              <span style="color:#4a7fd4; font-weight:700;">RTE</span> — Auto-assigned on layout generation: 5th compute in Cabinet 1, 5th compute in Cabinet 2. RTE computes <em>cannot</em> host VMs.
-            </li>
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#36c459; font-weight:700;">Controller</span> — Auto-assigned on layout generation: 4th compute in Cabinet 1; 3rd and 4th computes in Cabinet 2. Controller computes <em>cannot</em> host VMs.
-            </li>
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#ffb570; font-weight:700;">OAM</span> — Auto-assigned on layout generation. The highest-numbered <span style="color:#ff00ff;">Gold CPU</span> compute in each of Cabinets 4, 5 and 6 is designated OAM. OAM computes <em>cannot</em> host VMs.
-            </li>
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#ffff33; font-weight:700;">WMG</span> — Auto-assigned (when enabled) <em>before</em> SRIOV. Exactly 9 computes, must be <span style="color:#ff00ff;">Gold CPU</span>. Excludes Kickstart, RTE, Controller, OAM. Within each cabinet, picks alternate between the lowest and highest available computes for maximum spread; round-robin across cabinets to maximise cabinet distribution.
-            </li>
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#19edff; font-weight:700;">SRIOV</span> — Auto-assigned after WMG. Cabinet-pair quotas: C1+C2 ≤ 12, C3+C4 ≤ 11, C5+C6 ≤ 8 (total cap 31). Excludes Kickstart, RTE, Controller, OAM, and WMG. Within each cabinet, picks alternate between the lowest and highest available computes to maximise physical spread.
-            </li>
-            <li style="font-size:12px; color:#c9d1d9; line-height:1.5;">
-              <span style="color:#ff00ff; font-weight:700;">Gold CPU</span> — Manually specified. Must be more than 3 computes. Colours the server number <span style="color:#ff00ff;">magenta</span> in the layout; does not change the slot background colour.
-            </li>
-          </ol>
-        </div>
       </div>
 
       <!-- Save / Load -->
@@ -856,64 +802,6 @@
         <h2>Step 2 — Server Count per Cabinet</h2>
         <p>Enter the number of servers you want to place in each cabinet, then generate the layout.</p>
         <table class="server-count-table" id="cabinetGrid"></table>
-
-        <div class="group-input-row mt-20" id="attr-row-gold" style="--gc:#ff00ff; --gcd:#2a002a; --gcb:#cc00cc;">
-          <span class="group-dot" style="color:#ff00ff;">&#9670;</span>
-          <span class="group-label" style="color:#ff00ff;">Gold CPU</span>
-          <div class="color-swatch" style="background:#ff00ff;"></div>
-          <input type="text" id="goldInput" value="" style="width:200px;" />
-          <span class="group-hint">number colour only — must be &gt; 3 computes if provided</span>
-        </div>
-
-        <div class="group-input-row mt-8" id="attr-row-rte" style="--gc:#4a7fd4; --gcd:#0a1a35; --gcb:#1952ae;">
-          <span class="group-dot" style="color:#4a7fd4;">&#9670;</span>
-          <span class="group-label" style="color:#4a7fd4;">RTE</span>
-          <div class="color-swatch" style="background:#1952ae;"></div>
-          <input type="text" id="rteInput" value="" style="width:200px;" />
-          <span class="group-hint">ranges (1-5), individual (2,5,8) or mix</span>
-        </div>
-
-        <div class="group-input-row mt-8" id="attr-row-controller" style="--gc:#36c459; --gcd:#0d2a15; --gcb:#36c459;">
-          <span class="group-dot" style="color:#36c459;">&#9670;</span>
-          <span class="group-label" style="color:#36c459;">Controller</span>
-          <div class="color-swatch" style="background:#36c459;"></div>
-          <input type="text" id="controllerInput" value="" style="width:200px;" />
-          <span class="group-hint">ranges (1-5), individual (2,5,8) or mix</span>
-        </div>
-
-        <div class="group-input-row mt-8" id="attr-row-oam" style="--gc:#ffb570; --gcd:#2a1500; --gcb:#cc7a30;">
-          <span class="group-dot" style="color:#ffb570;">&#9670;</span>
-          <span class="group-label" style="color:#ffb570;">OAM</span>
-          <div class="color-swatch" style="background:#ffb570;"></div>
-          <input type="text" id="oamInput" placeholder="e.g. 1-3, 7, 10-12" style="width:200px;" />
-          <span class="group-hint">ranges (1-5), individual (2,5,8) or mix</span>
-        </div>
-
-        <div class="group-input-row mt-8" id="attr-row-sriov" style="--gc:#19edff; --gcd:#002a2e; --gcb:#19edff;">
-          <span class="group-dot" style="color:#19edff;">&#9670;</span>
-          <span class="group-label" style="color:#19edff;">SRIOV</span>
-          <div class="color-swatch" style="background:#19edff;"></div>
-          <input type="text" id="sriovInput" placeholder="e.g. 1-3, 7, 10-12" style="width:200px;" />
-          <span class="group-hint">ranges (1-5), individual (2,5,8) or mix</span>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:16px; margin-top:12px; margin-bottom:4px;">
-          <span style="font-size:12px; color:#ffff33; font-weight:600;">WMG</span>
-          <label style="display:flex; align-items:center; gap:5px; font-size:13px; color:#c9d1d9; cursor:pointer;">
-            <input type="radio" name="wmgEnabled" id="wmgYes" value="yes" checked onchange="onWmgToggle(true)" /> Yes
-          </label>
-          <label style="display:flex; align-items:center; gap:5px; font-size:13px; color:#c9d1d9; cursor:pointer;">
-            <input type="radio" name="wmgEnabled" id="wmgNo" value="no" onchange="onWmgToggle(true)" /> No
-          </label>
-        </div>
-
-        <div class="group-input-row mt-8" id="attr-row-wmg" style="--gc:#ffff33; --gcd:#2a2a00; --gcb:#cccc00;">
-          <span class="group-dot" style="color:#ffff33;">&#9670;</span>
-          <span class="group-label" style="color:#ffff33;">WMG</span>
-          <div class="color-swatch" style="background:#ffff33;"></div>
-          <input type="text" id="wmgInput" placeholder="e.g. 1-3, 7, 10-12" style="width:200px;" />
-          <span class="group-hint">ranges (1-5), individual (2,5,8) or mix</span>
-        </div>
 
         <input type="hidden" id="dismantleInput" value="" />
 
@@ -942,12 +830,6 @@
       <div class="attr-panel hidden" id="attrPanel">
         <span class="sel-count" id="selCount">Click on any server to select</span>
         <div class="attr-btn-group">
-          <button class="attr-btn attr-rte"        id="panel-btn-rte"        onclick="assignAttribute('rte')">🔓 RTE</button>
-          <button class="attr-btn attr-controller"  id="panel-btn-controller"  onclick="assignAttribute('controller')">🔓 Controller</button>
-          <button class="attr-btn attr-oam"         id="panel-btn-oam"         onclick="assignAttribute('oam')">🔓 OAM</button>
-          <button class="attr-btn attr-sriov"       id="panel-btn-sriov"       onclick="assignAttribute('sriov')">🔓 SRIOV</button>
-          <button class="attr-btn attr-wmg"         id="panel-btn-wmg"         onclick="assignAttribute('wmg')">🔓 WMG</button>
-          <button class="attr-btn attr-gold"        id="panel-btn-gold"        onclick="assignAttribute('gold')">🔓 Gold CPU</button>
           <button class="attr-btn"                  id="panel-btn-dismantle"   onclick="assignAttribute('dismantle')" style="color:#888899;border-color:#666677;">💀 Dismantle</button>
         </div>
         <div class="attr-btn-group">
@@ -971,7 +853,7 @@
         <div class="vm-sidebar" id="vmSidebar">
           <div class="vm-sidebar-title">VM Allocation</div>
 
-          <!-- Row 1: 1st (DGW) + 2nd (WMG) -->
+          <!-- Row 1: DGW -->
           <div class="vm-row">
             <!-- 1st VM -->
             <div class="vm-slot-block">
@@ -986,25 +868,11 @@
                 <button class="btn btn-danger btn-sm" onclick="removeVM1()">Remove</button>
               </div>
             </div>
-
-            <!-- 2nd VM -->
-            <div class="vm-slot-block" id="vm2Block">
-              <div class="vm-slot-label"><span style="color:#ffff33;">WMG</span><span id="vm2ZeroMark" style="display:none; color:#ff4444; font-weight:900; margin-left:5px;">✕</span></div>
-              <input type="hidden" id="vm2Select" value="WMG" />
-              <div class="vm-field" id="vm2NumRow">
-                <label>Total VMs</label>
-                <input type="number" id="vm2Num" min="0" value="8" />
-              </div>
-              <div class="vm-actions">
-                <button class="btn btn-blue btn-sm" onclick="assignVM2()">Assign</button>
-                <button class="btn btn-danger btn-sm" onclick="removeVM2()">Remove</button>
-              </div>
-            </div>
           </div>
 
           <div class="vm-divider" id="haDivider" style="display:none;"></div>
 
-          <!-- Row 2: 3rd (HA) + 4th (MME) — shown after DGW+WMG committed -->
+          <!-- Row 2: 3rd (HA) + 4th (MME) — shown after DGW committed -->
           <div class="vm-row" id="haMMERow" style="display:none;">
             <!-- HA VM -->
             <div class="vm-slot-block" id="haBlock">
@@ -1136,7 +1004,7 @@
   <div class="kam-body">
     You have existing compute type assignments and VM allocations.<br><br>
     <strong>Keep current allocations?</strong><br>
-    Compute types (RTE, Controller, OAM, WMG, SRIOV) and VM assignments will not be re-assigned automatically.
+    Compute type assignments and VM assignments will not be re-assigned automatically.
   </div>
   <div class="kam-foot">
     <button class="kam-no"  onclick="kamChoose(false)">No — Reassign All</button>
@@ -1194,7 +1062,6 @@
     [4,5],[7,8],[10,11],[13,14],[16,17],[19,20],
     [26,27],[29,30],[32,33],[35,36],[38,39]
   ];
-  // Cabinet 1 skips U19-20: after compute 4 (U16-17), compute 5 starts at U26-27
   const CAB1_SLOT_MAP = [
     [4,5],[7,8],[10,11],[13,14],[16,17],
     [26,27],[29,30],[32,33],[35,36]
@@ -1202,79 +1069,16 @@
   // ci is 0-based cabinet index
   function getSlotMap(ci) { return ci === 0 ? CAB1_SLOT_MAP : COMPUTE_SLOT_MAP; }
 
-  // ── Cached attribute sets (kept in sync with inputs) ─────────
-  let cachedSriovSet = new Set();
-  let cachedWmgSet   = new Set();
-
-  function isWmgEnabled() {
-    const el = document.getElementById('wmgYes');
-    return !el || el.checked;   // default true if element not yet in DOM
-  }
-
-  function onWmgToggle(fromUser = false) {
-    const enabled = isWmgEnabled();
-
-    // Only warn when the user manually clicks the radio button, not on programmatic calls
-    const hasAllocations = fromUser && [vm1Assignments, vm2Assignments, haAssignments, mmeAssignments, cgwAssignments]
-      .some(m => Object.keys(m).length > 0);
-
-    if (hasAllocations) {
-      const confirmed = confirm(
-        `Changing WMG will reset ALL VM allocations in the cabinet layout. This cannot be undone.\n\nContinue?`
-      );
-      if (!confirmed) {
-        // Revert the radio buttons to their previous state
-        document.getElementById('wmgYes').checked = !enabled;
-        document.getElementById('wmgNo').checked  =  enabled;
-        return;
-      }
-      // Reset all VM allocations
-      vm1Assignments = {};
-      vm2Assignments = {};
-      haAssignments  = {};
-      vm1Committed   = false;
-      vm2Committed   = false;
-      haCommitted    = false;
-      vmSlotOrder    = {};
-      clearMmeCgwState();
-      clearHistory();
-      const zm1 = document.getElementById('vm1ZeroMark'); if (zm1) zm1.style.display = 'none';
-      const zm2 = document.getElementById('vm2ZeroMark'); if (zm2) zm2.style.display = 'none';
-      const zmH = document.getElementById('haZeroMark');  if (zmH) zmH.style.display = 'none';
-      if (!document.getElementById('layoutSection').classList.contains('hidden')) rerenderRacks();
-    }
-
-    // Show/hide the WMG attribute row in Step 2
-    const row = document.getElementById('attr-row-wmg');
-    if (row) row.style.display = enabled ? '' : 'none';
-    // Show/hide the 2nd VM block in the layout sidebar
-    const vm2 = document.getElementById('vm2Block');
-    const div  = document.getElementById('vm2Divider');
-    if (vm2) vm2.style.display = enabled ? '' : 'none';
-    if (div) div.style.display = enabled ? '' : 'none';
-    // Clear WMG input & assignments when disabled
-    if (!enabled) {
-      document.getElementById('wmgInput').value = '';
-      vm2Assignments = {};
-      vm2Committed   = false;
-      const zm2 = document.getElementById('vm2ZeroMark'); if (zm2) zm2.style.display = 'none';
-    }
-    showHaBlockIfReady();
-  }
-
   function refreshAttrCache() {
-    cachedSriovSet = parseGoldSet(document.getElementById('sriovInput').value);
-    cachedWmgSet   = parseGoldSet(document.getElementById('wmgInput').value);
+    // No domain-specific caches needed
   }
 
   // ── VM assignments ───────────────────────────────────────────
   let vm1Assignments = {};   // { serverNum: "TYPE-num" }
-  let vm2Assignments = {};   // { serverNum: "TYPE-num" }
   let haAssignments  = {};   // { serverNum: "HA-num" }
   let mmeAssignments = {};   // { serverNum: "MME-num" }
   let cgwAssignments = {};   // { serverNum: "CGW-num" }
   let vm1Committed   = false;
-  let vm2Committed   = false;
   let haCommitted    = false;
 
   // Returns the display { left, right } for any server, incorporating all VM types.
@@ -1282,7 +1086,6 @@
   function getServerVmSlots(n) {
     const vms = [];
     if (vm1Assignments[n]) vms.push(vm1Assignments[n]);  // DGW
-    if (vm2Assignments[n]) vms.push(vm2Assignments[n]);  // WMG
     if (haAssignments[n])  vms.push(haAssignments[n]);   // HA
     if (mmeAssignments[n]) vms.push(mmeAssignments[n]);  // MME
     if (cgwAssignments[n]) vms.push(cgwAssignments[n]);  // CGW
@@ -1305,7 +1108,6 @@
   function vmTagColor(label) {
     const t = label ? label.split('-')[0] : '';
     if (t === 'DGW') return 'rgba(25,237,255,0.30)';
-    if (t === 'WMG') return 'rgba(255,255,51,0.25)';
     if (t === 'HA')  return 'rgba(126,231,135,0.35)';
     if (t === 'MME') return 'rgba(255,170,51,0.35)';
     if (t === 'CGW') return 'rgba(199,146,234,0.35)';
@@ -1331,25 +1133,19 @@
   function vmTypeOf(label) { return label ? label.split('-')[0] : null; }
 
   function isVMRestricted(serverNum) {
-    // Principle 1: Kickstart, RTE, Controller, OAM, Dismantle cannot have VMs
-    if (kickstartNum !== null && serverNum === kickstartNum) return true;
-    const rteSet       = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet      = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet       = parseGoldSet(document.getElementById('oamInput').value);
     const dismantleSet = parseGoldSet(document.getElementById('dismantleInput').value);
-    return rteSet.has(serverNum) || ctrlSet.has(serverNum) || oamSet.has(serverNum) || dismantleSet.has(serverNum);
+    return dismantleSet.has(serverNum);
   }
 
   // ── Drag-to-move VM helpers ──────────────────────────────────
 
   function vmCountForServer(n) {
-    return [vm1Assignments, vm2Assignments, haAssignments, mmeAssignments, cgwAssignments]
+    return [vm1Assignments, haAssignments, mmeAssignments, cgwAssignments]
       .filter(m => m[n]).length;
   }
 
   function hasVmType(n, type) {
     if (type === 'DGW') return !!vm1Assignments[n];
-    if (type === 'WMG') return !!vm2Assignments[n];
     if (type === 'HA')  return !!haAssignments[n];
     if (type === 'MME') return !!mmeAssignments[n];
     if (type === 'CGW') return !!cgwAssignments[n];
@@ -1357,14 +1153,7 @@
   }
 
   function serverRoleName(n) {
-    if (kickstartNum !== null && n === kickstartNum) return 'Kickstart';
-    const rteSet       = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet      = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet       = parseGoldSet(document.getElementById('oamInput').value);
     const dismantleSet = parseGoldSet(document.getElementById('dismantleInput').value);
-    if (rteSet.has(n))       return 'RTE';
-    if (ctrlSet.has(n))      return 'Controller';
-    if (oamSet.has(n))       return 'OAM';
     if (dismantleSet.has(n)) return 'Dismantle';
     return null;
   }
@@ -1388,16 +1177,6 @@
       return { ok: false, message: 'Rule violated: Target compute already has 2 VMs (maximum allowed).' };
     if (hasVmType(targetNum, type))
       return { ok: false, message: `Rule violated: Target compute already has a ${type} VM assigned.` };
-    if (type === 'DGW' || type === 'HA') {
-      const sriovSet = parseGoldSet(document.getElementById('sriovInput').value);
-      if (!sriovSet.has(targetNum))
-        return { ok: false, message: `Rule violated: ${type} VMs can only be placed on SRIOV computes.` };
-    }
-    if (type === 'WMG') {
-      const wmgSet = parseGoldSet(document.getElementById('wmgInput').value);
-      if (!wmgSet.has(targetNum))
-        return { ok: false, message: 'Rule violated: WMG VMs can only be placed on WMG computes.' };
-    }
     return { ok: true };
   }
 
@@ -1420,7 +1199,7 @@
     const swCopy = {};
     for (const ci in cabSwitches) swCopy[ci] = { ...cabSwitches[ci] };
     return {
-      vm1: { ...vm1Assignments }, vm2: { ...vm2Assignments },
+      vm1: { ...vm1Assignments },
       ha:  { ...haAssignments  }, mme: { ...mmeAssignments },
       cgw: { ...cgwAssignments }, ord: ordCopy,
       cabCounts, switches: swCopy, manual: { ...manualComputes },
@@ -1429,7 +1208,7 @@
   }
 
   function applySnapshot(s) {
-    vm1Assignments = { ...s.vm1 }; vm2Assignments = { ...s.vm2 };
+    vm1Assignments = { ...s.vm1 };
     haAssignments  = { ...s.ha  }; mmeAssignments = { ...s.mme };
     cgwAssignments = { ...s.cgw };
     vmSlotOrder = {};
@@ -1512,7 +1291,7 @@
   function openVmRename(label, serverNum, clickX, clickY) {
     const type = label.split('-')[0];
     const suffix = label.slice(type.length + 1); // everything after "TYPE-"
-    const MAP = { DGW: vm1Assignments, WMG: vm2Assignments, HA: haAssignments,
+    const MAP = { DGW: vm1Assignments, HA: haAssignments,
                   MME: mmeAssignments, CGW: cgwAssignments };
     _vrpState = { oldLabel: label, type, serverNum, map: MAP[type] };
 
@@ -1551,7 +1330,7 @@
     const newLabel = type + '-' + suffix;
     if (newLabel !== oldLabel) {
       // Check for duplicate across ALL VM type maps
-      const allMaps = [vm1Assignments, vm2Assignments, haAssignments, mmeAssignments, cgwAssignments];
+      const allMaps = [vm1Assignments, haAssignments, mmeAssignments, cgwAssignments];
       const duplicate = allMaps.some(m => Object.values(m).includes(newLabel));
       if (duplicate) {
         inp.classList.add('vrp-error');
@@ -1598,32 +1377,16 @@
 
   const CTP_TYPES = [
     { key: 'standard',   label: 'Standard',        color: '#c9d1d9' },
-    { key: 'sriov',      label: 'SRIOV',           color: '#19edff' },
-    { key: 'wmg',        label: 'WMG',             color: '#ffff33' },
-    { key: 'oam',        label: 'OAM',             color: '#ffb570' },
-    { key: 'controller', label: 'Controller',      color: '#36c459' },
-    { key: 'rte',        label: 'RTE',             color: '#4a7fd4' },
     { key: 'dismantle',  label: '💀 Dismantle',    color: '#888899' },
   ];
 
   function ctpCurrentType(n) {
-    const sriovSet      = parseGoldSet(document.getElementById('sriovInput').value);
-    const wmgSet        = parseGoldSet(document.getElementById('wmgInput').value);
-    const oamSet        = parseGoldSet(document.getElementById('oamInput').value);
-    const ctrlSet       = parseGoldSet(document.getElementById('controllerInput').value);
-    const rteSet        = parseGoldSet(document.getElementById('rteInput').value);
     const dismantleSet  = parseGoldSet(document.getElementById('dismantleInput').value);
     if (dismantleSet.has(n)) return 'dismantle';
-    if (sriovSet.has(n))     return 'sriov';
-    if (wmgSet.has(n))       return 'wmg';
-    if (oamSet.has(n))       return 'oam';
-    if (ctrlSet.has(n))      return 'controller';
-    if (rteSet.has(n))       return 'rte';
     return 'standard';
   }
 
   function openChangeTypePopup(serverNum, ci, computeIdx, clientX, clientY) {
-    if (kickstartNum !== null && serverNum === kickstartNum) return;
     _ctpNum = serverNum;
     _ctpCi  = ci;
     _ctpIdx = computeIdx;
@@ -1657,21 +1420,12 @@
     });
   }
 
-  const CTP_CONFIRM_TYPES = new Set(['oam', 'controller', 'rte']);
-
   function ctpApply(newType) {
     if (_ctpNum === null) return;
     const n = _ctpNum;
-    const currentType = ctpCurrentType(n);
-    if (CTP_CONFIRM_TYPES.has(currentType) || CTP_CONFIRM_TYPES.has(newType)) {
-      const fromLabel = CTP_TYPES.find(t => t.key === currentType)?.label ?? currentType;
-      const toLabel   = CTP_TYPES.find(t => t.key === newType)?.label   ?? newType;
-      const ok = confirm(`Change Server ${n} from ${fromLabel} to ${toLabel}?\n\nThis may affect VM allocation rules.`);
-      if (!ok) return;
-    }
     pushUndo();
-    // Remove from all type inputs
-    ['sriov', 'wmg', 'oam', 'controller', 'rte', 'dismantle'].forEach(attr => {
+    // Remove from dismantle input
+    ['dismantle'].forEach(attr => {
       const input = document.getElementById(`${attr}Input`);
       const set = parseGoldSet(input.value);
       set.delete(n);
@@ -1686,7 +1440,7 @@
     }
     // If changing TO Dismantle, evict any VMs currently on this compute
     if (newType === 'dismantle') {
-      [vm1Assignments, vm2Assignments, haAssignments, mmeAssignments, cgwAssignments]
+      [vm1Assignments, haAssignments, mmeAssignments, cgwAssignments]
         .forEach(m => { if (m[n]) delete m[n]; });
       delete vmSlotOrder[n];
     }
@@ -1724,7 +1478,7 @@
     delete manualComputes[key];
     userAddedSlots.delete(key);
     // Evict any VMs on this compute
-    [vm1Assignments, vm2Assignments, haAssignments, mmeAssignments, cgwAssignments]
+    [vm1Assignments, haAssignments, mmeAssignments, cgwAssignments]
       .forEach(m => { if (m[n]) delete m[n]; });
     delete vmSlotOrder[n];
     ctpClose();
@@ -1943,7 +1697,7 @@
       // Same compute side-swap: just update vmSlotOrder, no assignment map change needed
       vmSlotOrder[sourceNum] = { [side]: label, [otherSide]: null };
     } else {
-      const MAP = { DGW: vm1Assignments, WMG: vm2Assignments, HA: haAssignments,
+      const MAP = { DGW: vm1Assignments, HA: haAssignments,
                     MME: mmeAssignments, CGW: cgwAssignments };
 
       // Record explicit side placement on the target
@@ -1972,10 +1726,8 @@
   }
   // ─────────────────────────────────────────────────────────────
 
-  // Returns the target server set: auto for DGW→SRIOV, WMG→WMG, others→selection
+  // Returns the target server set: selection-based for all VM types
   function getVmTargets(type) {
-    if (type === 'DGW') return new Set(cachedSriovSet);
-    if (type === 'WMG') return new Set(cachedWmgSet);
     return new Set(selectedNums);
   }
 
@@ -2002,14 +1754,12 @@
     if (isNaN(total) || total < 0) { alert('Please enter 0 or a positive number of VMs.'); return; }
     const targets = getVmTargets(type);
     if (!targets.size) {
-      alert(type === 'DGW' ? 'No SRIOV computes found — generate layout first.' :
-            type === 'WMG' ? 'No WMG computes found — generate layout first.'   :
-            'Please select one or more computes first.');
+      alert('Please select one or more computes first.');
       return;
     }
     const eligible = Array.from(targets)
       .sort((a, b) => a - b)
-      .filter(n => !isVMRestricted(n) && !(vm2Assignments[n] && vmTypeOf(vm2Assignments[n]) === type));
+      .filter(n => !isVMRestricted(n));
     if (!eligible.length) { alert('No eligible computes available for this VM type.'); return; }
     document.getElementById('vm1ZeroMark').style.display = total === 0 ? '' : 'none';
     vm1Committed = true;
@@ -2041,56 +1791,9 @@
     showHaBlockIfReady();
   }
 
-  function assignVM2() {
-    const type = document.getElementById('vm2Select').value;
-    if (!type) { alert('Please select a VM type.'); return; }
-    const total = parseInt(document.getElementById('vm2Num').value);
-    if (isNaN(total) || total < 0) { alert('Please enter 0 or a positive number of VMs.'); return; }
-    const targets = getVmTargets(type);
-    if (!targets.size) {
-      alert(type === 'DGW' ? 'No SRIOV computes found — generate layout first.' :
-            type === 'WMG' ? 'No WMG computes found — generate layout first.'   :
-            'Please select one or more computes first.');
-      return;
-    }
-    const eligible = Array.from(targets)
-      .sort((a, b) => a - b)
-      .filter(n => !isVMRestricted(n) && !(vm1Assignments[n] && vmTypeOf(vm1Assignments[n]) === type));
-    if (!eligible.length) { alert('No eligible computes available for this VM type.'); return; }
-    document.getElementById('vm2ZeroMark').style.display = total === 0 ? '' : 'none';
-    vm2Committed = true;
-    if (total === 0) {
-      vm2Assignments = {};
-      clearSelection();
-      showHaBlockIfReady();
-      return;
-    }
-    const toAssign = eligible.slice(0, total);
-    toAssign.forEach((n, i) => { vm2Assignments[n] = `${type}-${i + 1}`; });
-    if (total > eligible.length) {
-      alert(`Only ${eligible.length} WMG compute(s) available — assigned WMG-1 to WMG-${eligible.length}.`);
-    }
-    clearSelection();
-    rerenderRacks();
-    flashAssignedSlots(toAssign);
-    showHaBlockIfReady();
-  }
-
-  function removeVM2() {
-    document.getElementById('vm2ZeroMark').style.display = 'none';
-    vm2Committed = false;
-    vm2Assignments = {};
-    haAssignments = {};
-    document.getElementById('haZeroMark').style.display = 'none';
-    clearSelection();
-    rerenderRacks();
-    showHaBlockIfReady();
-  }
-
   // ── HA VM ────────────────────────────────────────────────────
   function showHaBlockIfReady() {
-    const wmg = isWmgEnabled();
-    const show = vm1Committed && (wmg ? vm2Committed : true);
+    const show = vm1Committed;
     const haDivider = document.getElementById('haDivider');
     const haMMERow  = document.getElementById('haMMERow');
     if (haDivider) haDivider.style.display = show ? '' : 'none';
@@ -2108,41 +1811,26 @@
   function assignHA() {
     const total = parseInt(document.getElementById('haNum').value);
     if (isNaN(total) || total < 0) { alert('Please enter 0 or a positive number of VMs.'); return; }
-    if (!cachedSriovSet.size) { alert('No SRIOV computes found — generate layout first.'); return; }
     document.getElementById('haZeroMark').style.display = total === 0 ? '' : 'none';
     haCommitted = true;
     haAssignments = {};
     if (total === 0) { rerenderRacks(); showMmeCgwBlockIfReady(); return; }
 
-    // Scatter HA across cabinets: group SRIOV computes by cabinet
+    // Scatter HA across cabinets using any eligible computes
     const { cabinets } = collectData();
-    const byCab = cabinets
-      .map(cab => Array.from(cachedSriovSet)
-        .filter(n => n >= cab.startNum && n < cab.startNum + cab.count && !isVMRestricted(n))
-        .sort((a, b) => a - b))
-      .filter(arr => arr.length > 0);
-
-    if (!byCab.length) { alert('No eligible SRIOV computes found.'); return; }
-
-    // Distribute as evenly as possible: first (total % C) cabinets get one extra
-    const C = byCab.length;
-    const base  = Math.floor(total / C);
-    const extra = total % C;
-    const perCab = byCab.map((_, i) => base + (i < extra ? 1 : 0));
-
-    const toAssign = [];
-    let vmIdx = 1;
-    byCab.forEach((cabNums, i) => {
-      const take = Math.min(perCab[i], cabNums.length);
-      cabNums.slice(0, take).forEach(n => {
-        haAssignments[n] = `HA-${vmIdx++}`;
-        toAssign.push(n);
-      });
+    const allEligible = [];
+    cabinets.forEach(cab => {
+      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) {
+        if (!isVMRestricted(n)) allEligible.push(n);
+      }
     });
 
-    const assigned = toAssign.length;
-    if (total > assigned) {
-      alert(`Only ${assigned} eligible SRIOV compute(s) available — assigned HA-1 to HA-${assigned}.`);
+    if (!allEligible.length) { alert('No eligible computes found.'); return; }
+
+    const toAssign = allEligible.slice(0, total);
+    toAssign.forEach((n, i) => { haAssignments[n] = `HA-${i + 1}`; });
+    if (total > allEligible.length) {
+      alert(`Only ${allEligible.length} eligible compute(s) available — assigned HA-1 to HA-${allEligible.length}.`);
     }
     clearSelection();
     rerenderRacks();
@@ -2225,7 +1913,6 @@
 
 
   // ── Drag-to-move VM state ────────────────────────────────────
-  let kickstartNum    = null; // Server number of the Kickstart compute (always 1st in Cabinet 1)
   let cabSwitches     = {};   // { ci: { u: label } } — manually added switches per cabinet
   let manualComputes  = {};   // { "ci-computeIdx": serverNum } — computes added to specific empty slots
   let userAddedSlots  = new Set(); // "ci-computeIdx" keys the user explicitly added — survives sequential absorption
@@ -2285,7 +1972,7 @@
 
   function removeAttribute() {
     if (!selectedNums.size) return;
-    ['gold','rte','controller','oam','sriov','wmg','dismantle'].forEach(attr => {
+    ['dismantle'].forEach(attr => {
       const input = document.getElementById(`${attr}Input`);
       const existing = parseGoldSet(input.value);
       selectedNums.forEach(n => existing.delete(n));
@@ -2343,11 +2030,10 @@
       </thead>
       <tbody id="cabinetTbody"></tbody>
     `;
-    const DEFAULT_CAB_COUNTS = [8, 10, 11, 11, 11, 7]; // per-cabinet defaults (Cab1: 8 visible, slot 0 reserved for hidden kickstart)
+    const DEFAULT_CAB_COUNTS = [9, 10, 11, 11, 11, 7]; // per-cabinet defaults
     const tbody = table.querySelector('#cabinetTbody');
     for (let i = 1; i <= n; i++) {
-      // Cab1 loses one visible slot to the hidden kickstart at index 0
-      const maxSlots = i === 1 ? CAB1_SLOT_MAP.length - 1 : COMPUTE_SLOT_MAP.length;
+      const maxSlots = i === 1 ? CAB1_SLOT_MAP.length : COMPUTE_SLOT_MAP.length;
       const defaultCount = DEFAULT_CAB_COUNTS[i - 1] ?? maxSlots;
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -2409,9 +2095,8 @@
         nextNum  = fVal + count; // next sequential picks up after this range
       } else {
         // Sequential: follow on from previous cabinet
-        // Cabinet 1: add 1 internally to reserve slot 0 for the hidden kickstart
-        const userCount = Math.min(parseInt(countEl?.value) || 0, maxSlotsForCab - (i === 1 ? 1 : 0));
-        count    = i === 1 ? userCount + 1 : userCount;
+        const userCount = Math.min(parseInt(countEl?.value) || 0, maxSlotsForCab);
+        count    = userCount;
         startNum = nextNum;
         nextNum  = startNum + count;
       }
@@ -2421,153 +2106,6 @@
     return { cabinets, cabinetSize };
   }
 
-  // ── Auto OAM assignment ───────────────────────────────────────
-  // For Cabinets 4, 5, 6 (indices 3,4,5): pick the highest-numbered
-  // Gold CPU compute in each cabinet as OAM.
-  function autoAssignOAM(cabinets, goldSet) {
-    const oamSet = new Set();
-    [3, 4, 5].forEach(idx => {
-      if (idx >= cabinets.length) return;
-      const cab = cabinets[idx];
-      let lastGold = null;
-      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) {
-        if (goldSet.has(n)) lastGold = n; // iterating low→high, so last = highest
-      }
-      if (lastGold !== null) oamSet.add(lastGold);
-    });
-    return oamSet;
-  }
-  // ─────────────────────────────────────────────────────────────
-
-  // ── Auto RTE assignment ───────────────────────────────────────
-  // 5th compute (index 4) in Cabinet 1 (index 0)
-  // 5th compute (index 4) in Cabinet 2 (index 1)
-  function autoAssignRTE(cabinets) {
-    const rteSet = new Set();
-    if (cabinets.length >= 1 && cabinets[0].count >= 5)
-      rteSet.add(cabinets[0].startNum + 4);
-    if (cabinets.length >= 2 && cabinets[1].count >= 5)
-      rteSet.add(cabinets[1].startNum + 4);
-    return rteSet;
-  }
-  // ─────────────────────────────────────────────────────────────
-
-  // ── Auto Controller assignment ────────────────────────────────
-  // 4th compute (index 3) in Cabinet 1 (index 0)
-  // 3rd and 4th computes (indices 2 & 3) in Cabinet 2 (index 1)
-  function autoAssignController(cabinets) {
-    const ctrlSet = new Set();
-    if (cabinets.length >= 1 && cabinets[0].count >= 4)
-      ctrlSet.add(cabinets[0].startNum + 3);
-    if (cabinets.length >= 2 && cabinets[1].count >= 3)
-      ctrlSet.add(cabinets[1].startNum + 2);
-    if (cabinets.length >= 2 && cabinets[1].count >= 4)
-      ctrlSet.add(cabinets[1].startNum + 3);
-    return ctrlSet;
-  }
-  // ─────────────────────────────────────────────────────────────
-
-  // ── Auto SRIOV assignment ─────────────────────────────────────
-  // Pair rules: [cabIndex A, cabIndex B, max combined SRIOV]
-  const SRIOV_PAIR_RULES = [[0, 1, 12], [2, 3, 11], [4, 5, 8]];
-  const SRIOV_TOTAL_MAX  = 31;
-
-  // Pick up to maxCount servers alternating from lowest and highest of list,
-  // spreading selections across the full range of the cabinet.
-  function pickBalanced(list, maxCount) {
-    const picked = [];
-    let lo = 0, hi = list.length - 1;
-    let fromLow = true;
-    while (picked.length < maxCount && lo <= hi) {
-      if (fromLow) { picked.push(list[lo++]); }
-      else         { picked.push(list[hi--]); }
-      fromLow = !fromLow;
-    }
-    return picked;
-  }
-
-  function autoAssignSRIOV(cabinets) {
-    const rteSet  = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet  = parseGoldSet(document.getElementById('oamInput').value);
-    const wmgSet  = parseGoldSet(document.getElementById('wmgInput').value);
-
-    // Available (non-Kickstart, non-RTE, non-Controller, non-OAM, non-WMG) servers per cabinet
-    const avail = cabinets.map(cab => {
-      const list = [];
-      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) {
-        if (n === kickstartNum) continue;
-        if (rteSet.has(n) || ctrlSet.has(n) || oamSet.has(n) || wmgSet.has(n)) continue;
-        list.push(n);
-      }
-      return list;
-    });
-
-    const sriovSet = new Set();
-
-    SRIOV_PAIR_RULES.forEach(([ai, bi, pairMax]) => {
-      const a = avail[ai] || [];
-      const b = avail[bi] || [];
-      const remaining = SRIOV_TOTAL_MAX - sriovSet.size;
-      const total = Math.min(a.length + b.length, pairMax, remaining);
-
-      // Split as equally as possible between the two cabinets
-      const half = Math.floor(total / 2);
-      let cntA = Math.min(a.length, half);
-      let cntB = Math.min(b.length, total - cntA);
-      cntA     = Math.min(a.length, total - cntB); // re-balance if b was capped
-
-      pickBalanced(a, cntA).forEach(n => sriovSet.add(n));
-      pickBalanced(b, cntB).forEach(n => sriovSet.add(n));
-    });
-
-    return sriovSet;
-  }
-  // ─────────────────────────────────────────────────────────────
-
-  // ── Auto WMG assignment ───────────────────────────────────────
-  // Rules: exactly 9, must be Gold CPU, spread across as many cabinets as possible.
-  // Round-robin by cabinet: take 1 Gold CPU per cabinet each pass until target met.
-  function autoAssignWMG(cabinets, goldSet) {
-    const WMG_TARGET = 9;
-
-    const rteSet  = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet  = parseGoldSet(document.getElementById('oamInput').value);
-    const sriovSet= parseGoldSet(document.getElementById('sriovInput').value);
-
-    // Candidates: Gold CPU only, excluding RTE / Controller / OAM / SRIOV
-    // Pre-sorted in balanced order (low, high, next-low, next-high…) so that
-    // each round-robin pass picks from the extremes of the cabinet range.
-    const goldPerCab = cabinets.map(cab => {
-      const list = [];
-      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) {
-        if (goldSet.has(n) &&
-            !rteSet.has(n) && !ctrlSet.has(n) &&
-            !oamSet.has(n) && !sriovSet.has(n)) list.push(n);
-      }
-      return pickBalanced(list, list.length);
-    });
-
-    const wmgSet = new Set();
-    let round = 0;
-
-    // Round-robin: one from each cabinet per pass → maximises cabinet spread
-    while (wmgSet.size < WMG_TARGET) {
-      let addedThisRound = false;
-      for (let ci = 0; ci < goldPerCab.length && wmgSet.size < WMG_TARGET; ci++) {
-        if (round < goldPerCab[ci].length) {
-          wmgSet.add(goldPerCab[ci][round]);
-          addedThisRound = true;
-        }
-      }
-      if (!addedThisRound) break; // no more Gold CPU computes available
-      round++;
-    }
-
-    return wmgSet;
-  }
-  // ─────────────────────────────────────────────────────────────
 
   let hasGeneratedBefore = false;
 
@@ -2576,12 +2114,6 @@
 
     if (cabinets.every(c => c.count === 0)) {
       alert('Please enter at least one server count greater than 0.');
-      return;
-    }
-
-    const goldSet = parseGoldSet(document.getElementById('goldInput').value);
-    if (goldSet.size > 0 && goldSet.size <= 3) {
-      alert(`Gold CPU requires more than 3 computes. Currently ${goldSet.size} specified — please add more or clear the Gold CPU field.`);
       return;
     }
 
@@ -2604,18 +2136,9 @@
 
     // Snapshot existing VM assignments when keeping allocations
     const savedVm1  = keepAllocations ? { ...vm1Assignments  } : null;
-    const savedVm2  = keepAllocations ? { ...vm2Assignments  } : null;
     const savedHa   = keepAllocations ? { ...haAssignments   } : null;
     const savedMme  = keepAllocations ? { ...mmeAssignments  } : null;
     const savedCgw  = keepAllocations ? { ...cgwAssignments  } : null;
-    const savedRte  = keepAllocations ? document.getElementById('rteInput').value        : null;
-    const savedCtrl = keepAllocations ? document.getElementById('controllerInput').value : null;
-    const savedOam  = keepAllocations ? document.getElementById('oamInput').value        : null;
-    const savedWmg  = keepAllocations ? document.getElementById('wmgInput').value        : null;
-    const savedSriov= keepAllocations ? document.getElementById('sriovInput').value      : null;
-
-    // Cabinet 1: first compute is always Kickstart (no VMs allowed)
-    kickstartNum = cabinets.length >= 1 ? cabinets[0].startNum : null;
 
     // Preserve manually-added computes/switches that are still geometrically valid
     const _prevManual = manualComputes;
@@ -2642,46 +2165,13 @@
     }
 
     if (keepAllocations) {
-      // Restore saved compute-type assignments and VM allocations
-      document.getElementById('rteInput').value        = savedRte;
-      document.getElementById('controllerInput').value = savedCtrl;
-      document.getElementById('oamInput').value        = savedOam;
-      document.getElementById('wmgInput').value        = savedWmg;
-      document.getElementById('sriovInput').value      = savedSriov;
+      // Restore saved VM allocations
       vm1Assignments = savedVm1;
-      vm2Assignments = savedVm2;
       haAssignments  = savedHa;
       mmeAssignments = savedMme;
       cgwAssignments = savedCgw;
     } else {
-      const goldSet = parseGoldSet(document.getElementById('goldInput').value);
-
-      // Auto-assign RTE: 4th in Cab1; 5th in Cab2
-      const rteNums = autoAssignRTE(cabinets);
-      document.getElementById('rteInput').value = setToRangeStr(rteNums);
-
-      // Auto-assign Controller: 3rd in Cab1; 3rd+4th in Cab2
-      const ctrlNums = autoAssignController(cabinets);
-      document.getElementById('controllerInput').value = setToRangeStr(ctrlNums);
-
-      // Auto-assign OAM: last Gold CPU compute in Cabinets 4, 5, 6
-      const oamNums = autoAssignOAM(cabinets, goldSet);
-      document.getElementById('oamInput').value = setToRangeStr(oamNums);
-
-      // Auto-assign WMG first (so SRIOV avoids WMG computes)
-      if (isWmgEnabled()) {
-        const wmgNums = autoAssignWMG(cabinets, goldSet);
-        document.getElementById('wmgInput').value = setToRangeStr(wmgNums);
-      } else {
-        document.getElementById('wmgInput').value = '';
-      }
-
-      // Auto-assign SRIOV after WMG (excludes WMG computes from pool)
-      const sriovNums = autoAssignSRIOV(cabinets);
-      document.getElementById('sriovInput').value = setToRangeStr(sriovNums);
-
       vm1Assignments = {};
-      vm2Assignments = {};
       haAssignments  = {};
       mmeAssignments = {};
       cgwAssignments = {};
@@ -2701,7 +2191,6 @@
     }
 
     refreshAttrCache();
-    onWmgToggle();   // sync sidebar 2nd VM block visibility
     renderSummary(cabinets, cabinetSize);
     renderTypeCountBar(cabinets);
     renderRacks(cabinets, cabinetSize);
@@ -2713,12 +2202,7 @@
     const bar = document.getElementById('typeCountBar');
     if (!bar) return;
 
-    const goldSet       = parseGoldSet(document.getElementById('goldInput').value);
-    const rteSet        = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet       = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet        = parseGoldSet(document.getElementById('oamInput').value);
-    const sriovSet      = parseGoldSet(document.getElementById('sriovInput').value);
-    const wmgSet        = parseGoldSet(document.getElementById('wmgInput').value);
+    const dismantleSet = parseGoldSet(document.getElementById('dismantleInput').value);
 
     // Collect all server numbers (sequential + manually added)
     const allNums = [];
@@ -2729,29 +2213,18 @@
         if (parseInt(kci) === ci) allNums.push(manualComputes[key]);
       }
     });
-    const total = allNums.length;
 
     const counts = {
-      standard:   allNums.filter(n => !rteSet.has(n) && !ctrlSet.has(n) && !oamSet.has(n) && !sriovSet.has(n) && !wmgSet.has(n)).length,
-      rte:        rteSet.size,
-      controller: ctrlSet.size,
-      oam:        oamSet.size,
-      sriov:      sriovSet.size,
-      wmg:        wmgSet.size,
-      gold:       goldSet.size,
+      standard:  allNums.filter(n => !dismantleSet.has(n)).length,
+      dismantle: dismantleSet.size,
     };
 
     const types = [
-      { key: 'standard',   label: 'Standard',   color: '#c9d1d9', border: '#c9d1d9', bg: '#1e2530' },
-      { key: 'rte',        label: 'RTE',         color: '#4a7fd4', border: '#1952ae', bg: '#0a1a35' },
-      { key: 'controller', label: 'Controller',  color: '#36c459', border: '#36c459', bg: '#0d2a15' },
-      { key: 'oam',        label: 'OAM',         color: '#ffb570', border: '#ffb570', bg: '#2a1500' },
-      { key: 'sriov',      label: 'SRIOV',       color: '#19edff', border: '#19edff', bg: '#002a2e' },
-      { key: 'wmg',        label: 'WMG',         color: '#ffff33', border: '#cccc00', bg: '#2a2a00' },
-      { key: 'gold',       label: 'Gold CPU',    color: '#ff00ff', border: '#cc00cc', bg: '#2a002a' },
+      { key: 'standard',  label: 'Standard',  color: '#c9d1d9', border: '#c9d1d9', bg: '#1e2530' },
+      { key: 'dismantle', label: 'Dismantle', color: '#888899', border: '#666677', bg: '#1a1a1a' },
     ];
 
-    bar.innerHTML = types.map(t => `
+    bar.innerHTML = types.filter(t => counts[t.key] > 0).map(t => `
       <div class="type-count-pill" style="color:${t.color}; border-color:${t.border}; background:${t.bg};">
         <span class="tc-num">${counts[t.key]}</span>
         <span class="tc-label">${t.label}</span>
@@ -2780,23 +2253,11 @@
     const grid = document.getElementById('layoutGrid');
     grid.innerHTML = '';
 
-    const goldSet       = parseGoldSet(document.getElementById('goldInput').value);
-    const sriovSet      = parseGoldSet(document.getElementById('sriovInput').value);
-    const wmgSet        = parseGoldSet(document.getElementById('wmgInput').value);
-    const oamSet        = parseGoldSet(document.getElementById('oamInput').value);
-    const controllerSet = parseGoldSet(document.getElementById('controllerInput').value);
-    const rteSet        = parseGoldSet(document.getElementById('rteInput').value);
     const dismantleSet  = parseGoldSet(document.getElementById('dismantleInput').value);
 
     // Render legend
     const legendItems = [{ label: 'Standard', color: '#ffffff' }];
-    if (dismantleSet.size)     legendItems.push({ label: 'Dismantle 💀', color: '#888899' });
-    if (rteSet.size)        legendItems.push({ label: 'RTE',        color: '#4a7fd4' });
-    if (controllerSet.size) legendItems.push({ label: 'Controller', color: '#36c459' });
-    if (oamSet.size)        legendItems.push({ label: 'OAM',        color: '#ffb570' });
-    if (sriovSet.size)      legendItems.push({ label: 'SRIOV',      color: '#19edff' });
-    if (wmgSet.size)        legendItems.push({ label: 'WMG',        color: '#ffff33' });
-    if (goldSet.size)       legendItems.push({ label: 'Gold CPU ★ (number only)', color: '#ff00ff' });
+    if (dismantleSet.size) legendItems.push({ label: 'Dismantle 💀', color: '#888899' });
     const legendEl = document.getElementById('layoutLegend');
     if (legendEl) legendEl.innerHTML = legendItems.map(l =>
       `<span class="legend-pill"><span class="legend-pip" style="background:${l.color};border-color:${l.color};"></span>${l.label}</span>`
@@ -2821,7 +2282,7 @@
       const topUToIdx = {};
       const bottomUs  = new Set();
       getSlotMap(ci).forEach(([b, t], idx) => { topUToIdx[t] = idx; bottomUs.add(b); });
-      const TYPE_ABBR_MAP = { kickstart:'Kickstart', dismantle:'Dismantle', occupied:'Standard', sriov:'SRIOV', wmg:'WMG', oam:'OAM', controller:'CTRL', rte:'RTE' };
+      const TYPE_ABBR_MAP = { dismantle:'Dismantle', occupied:'Standard' };
 
       // Render top → bottom (U48 … U1). Each compute occupies 2U at fixed positions.
       for (let u = cabinetSize; u >= 1; u--) {
@@ -2838,29 +2299,15 @@
         const manualNum   = manualKey !== null ? manualComputes[manualKey] : undefined;
         const _seqNum     = (is2USlot && computeIdx < cab.count) ? cab.startNum + computeIdx : undefined;
         const _slotNum    = _seqNum ?? manualNum;
-        const isKickstart = kickstartNum !== null && _slotNum === kickstartNum;
-        const hasCompute  = is2USlot && !isKickstart && (computeIdx < cab.count || manualNum !== undefined);
+        const hasCompute  = is2USlot && (computeIdx < cab.count || manualNum !== undefined);
 
         if (hasCompute) {
           const serverNum = (computeIdx < cab.count) ? cab.startNum + computeIdx : manualNum;
           const bottomU   = COMPUTE_SLOT_MAP[computeIdx][0];
-          const barCls =
-            dismantleSet.has(serverNum)  ? 'dismantle'  :
-            sriovSet.has(serverNum)      ? 'sriov'      :
-            wmgSet.has(serverNum)        ? 'wmg'        :
-            oamSet.has(serverNum)        ? 'oam'        :
-            controllerSet.has(serverNum) ? 'controller' :
-            rteSet.has(serverNum)        ? 'rte'        : 'occupied';
-          const numCls = goldSet.has(serverNum) ? 'gold' : barCls;
+          const barCls = dismantleSet.has(serverNum) ? 'dismantle' : 'occupied';
+          const numCls = barCls;
           const tags = [];
-          if (kickstartNum !== null && serverNum === kickstartNum) tags.push('Kickstart');
-          if (dismantleSet.has(serverNum))  tags.push('Dismantle');
-          if (goldSet.has(serverNum))       tags.push('Gold CPU');
-          if (sriovSet.has(serverNum))      tags.push('SRIOV');
-          if (wmgSet.has(serverNum))        tags.push('WMG');
-          if (oamSet.has(serverNum))        tags.push('OAM');
-          if (controllerSet.has(serverNum)) tags.push('Controller');
-          if (rteSet.has(serverNum))        tags.push('RTE');
+          if (dismantleSet.has(serverNum)) tags.push('Dismantle');
           row.className     = 'slot-row';
           label.className   = `slot-label ${numCls}`;
           label.textContent = serverNum;
@@ -2870,7 +2317,7 @@
           slot.onclick      = e => {
             toggleSelectSlot(serverNum);
             const { left: lv, right: rv } = getServerVmSlots(serverNum);
-            if (!lv && !rv && (kickstartNum === null || serverNum !== kickstartNum))
+            if (!lv && !rv)
               openChangeTypePopup(serverNum, ci, computeIdx, e.clientX, e.clientY);
           };
           slot.addEventListener('dragover',  e => onSlotDragOver(e, serverNum, slot));
@@ -2917,11 +2364,10 @@
               slot.appendChild(skullEl);
             } else {
               const typeAbbr = TYPE_ABBR_MAP[barCls];
-              if (typeAbbr) {
+              if (typeAbbr && barCls === 'occupied') {
                 const typeEl = document.createElement('span');
                 typeEl.className = 'slot-type-label';
-                const showEmpty = barCls === 'sriov' || barCls === 'wmg' || barCls === 'occupied';
-                typeEl.innerHTML = typeAbbr + (showEmpty ? ' <span style="font-size:9px;font-weight:400;opacity:0.65;">empty</span>' : '');
+                typeEl.innerHTML = typeAbbr + ' <span style="font-size:9px;font-weight:400;opacity:0.65;">empty</span>';
                 slot.appendChild(typeEl);
               }
             }
@@ -3013,7 +2459,7 @@
       if (!el) continue;
       const userCount = parseInt(el.value) || 0;
       // seqCount = actual number of sequential slots collectData() produces for this cabinet
-      const seqCount = i === 1 ? userCount + 1 : userCount;
+      const seqCount = userCount;
       const manualForCab = Object.keys(manualComputes).filter(k => {
         const [kci, kidx] = k.split('-');
         return parseInt(kci) === ci && parseInt(kidx) >= seqCount;
@@ -3038,25 +2484,17 @@
     document.getElementById('siteNameDisplay').style.display = 'none';
     document.getElementById('numCabinets').value = 6;
     vm1Assignments = {};
-    vm2Assignments = {};
     haAssignments  = {};
     vm1Committed   = false;
-    vm2Committed   = false;
     haCommitted    = false;
     clearMmeCgwState();
     document.getElementById('vm1Select').value = 'DGW';
-    document.getElementById('vm2Select').value = 'WMG';
     document.getElementById('vm1ZeroMark').style.display = 'none';
-    document.getElementById('vm2ZeroMark').style.display = 'none';
     document.getElementById('haZeroMark').style.display  = 'none';
     document.getElementById('vm1Num').value = 1;
-    document.getElementById('vm2Num').value = 1;
     document.getElementById('haNum').value  = 1;
     document.getElementById('mmeNum').value = 1;
     document.getElementById('cgwNum').value = 1;
-    document.getElementById('wmgYes').checked = true;
-    document.getElementById('wmgNo').checked  = false;
-    onWmgToggle();
     setStepState(1);
   }
 
@@ -3103,26 +2541,18 @@
       cabinetSize,
       cabinets,
       attrs: {
-        gold:       document.getElementById('goldInput').value,
-        rte:        document.getElementById('rteInput').value,
-        controller: document.getElementById('controllerInput').value,
-        oam:        document.getElementById('oamInput').value,
-        sriov:      document.getElementById('sriovInput').value,
-        wmg:        document.getElementById('wmgInput').value,
+        dismantle: document.getElementById('dismantleInput').value,
       },
-      wmgEnabled: isWmgEnabled(),
       vms: {
-        committed: { vm1: vm1Committed, vm2: vm2Committed, ha: haCommitted },
+        committed: { vm1: vm1Committed, ha: haCommitted },
         assignments: {
           dgw: { ...vm1Assignments },
-          wmg: { ...vm2Assignments },
           ha:  { ...haAssignments  },
           mme: { ...mmeAssignments },
           cgw: { ...cgwAssignments },
         },
         nums: {
           vm1: document.getElementById('vm1Num')?.value,
-          vm2: document.getElementById('vm2Num')?.value,
           ha:  document.getElementById('haNum')?.value,
           mme: document.getElementById('mmeNum')?.value,
           cgw: document.getElementById('cgwNum')?.value,
@@ -3208,58 +2638,37 @@
     }
 
     if (config.attrs) {
-      document.getElementById('goldInput').value       = config.attrs.gold       || '';
-      document.getElementById('rteInput').value        = config.attrs.rte        || '';
-      document.getElementById('controllerInput').value = config.attrs.controller || '';
-      document.getElementById('oamInput').value        = config.attrs.oam        || '';
-      document.getElementById('sriovInput').value      = config.attrs.sriov      || '';
-      document.getElementById('wmgInput').value        = config.attrs.wmg        || '';
+      document.getElementById('dismantleInput').value = config.attrs.dismantle || '';
     }
-
-    // Clear the auto-assigned inputs so they don't show stale values before Generate
-    document.getElementById('oamInput').value   = '';
-    document.getElementById('sriovInput').value = '';
-    document.getElementById('wmgInput').value   = '';
-    // Restore WMG Yes/No toggle
-    const wmgYes = document.getElementById('wmgYes');
-    const wmgNo  = document.getElementById('wmgNo');
-    const enabled = config.wmgEnabled !== false;   // default true if not saved
-    if (wmgYes) wmgYes.checked = enabled;
-    if (wmgNo)  wmgNo.checked  = !enabled;
-    onWmgToggle();
 
     // ── Restore VM assignments ────────────────────────────────
     if (config.vms) {
       const v = config.vms;
       const a = v.assignments || {};
       // Check whether any VMs or committed states were saved
-      const anyAssigned = [a.dgw, a.wmg, a.ha, a.mme, a.cgw]
+      const anyAssigned = [a.dgw, a.ha, a.mme, a.cgw]
         .some(obj => obj && Object.keys(obj).length > 0);
       const anyCommitted = v.committed &&
-        (v.committed.vm1 || v.committed.vm2 || v.committed.ha);
+        (v.committed.vm1 || v.committed.ha);
 
       if (anyAssigned || anyCommitted) {
-        // Generate layout first so SRIOV/WMG/OAM are auto-assigned and
-        // the layout section is visible before we paint VM tags
+        // Generate layout first so the layout section is visible before we paint VM tags
         generateLayout();
 
         // Restore assignment maps (keys are string server numbers — matches runtime)
         vm1Assignments = a.dgw || {};
-        vm2Assignments = a.wmg || {};
         haAssignments  = a.ha  || {};
         mmeAssignments = a.mme || {};
         cgwAssignments = a.cgw || {};
 
         // Restore committed flags
         vm1Committed = !!(v.committed?.vm1);
-        vm2Committed = !!(v.committed?.vm2);
         haCommitted  = !!(v.committed?.ha);
 
         // Restore VM count inputs
         if (v.nums) {
           const sv = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
           sv('vm1Num', v.nums.vm1);
-          sv('vm2Num', v.nums.vm2);
           sv('haNum',  v.nums.ha);
           sv('mmeNum', v.nums.mme);
           sv('cgwNum', v.nums.cgw);
@@ -3413,48 +2822,26 @@
     const { cabinets, cabinetSize } = collectData();
     const siteName = (document.getElementById('siteName').value || '').trim();
 
-    // Attribute sets
-    const goldSet  = parseGoldSet(document.getElementById('goldInput').value);
-    const rteSet   = parseGoldSet(document.getElementById('rteInput').value);
-    const ctrlSet  = parseGoldSet(document.getElementById('controllerInput').value);
-    const oamSet   = parseGoldSet(document.getElementById('oamInput').value);
-    const sriovSet = parseGoldSet(document.getElementById('sriovInput').value);
-    const wmgSet   = parseGoldSet(document.getElementById('wmgInput').value);
-
     const dismantleSet2 = parseGoldSet(document.getElementById('dismantleInput').value);
     function slotType(n) {
-      if (kickstartNum !== null && n === kickstartNum) return 'kickstart';
       if (dismantleSet2.has(n)) return 'dismantle';
-      if (sriovSet.has(n)) return 'sriov';
-      if (wmgSet.has(n))   return 'wmg';
-      if (oamSet.has(n))   return 'oam';
-      if (ctrlSet.has(n))  return 'controller';
-      if (rteSet.has(n))   return 'rte';
       return 'standard';
     }
 
     // Cell fill colours (AARRGGBB)
     const SLOT_ARGB = {
-      empty:      'FFD8D8D8',
-      kickstart:  'FFFF9966',
-      dismantle:  'FFB0B0B8',
-      standard:   'FFB8D4F0',
-      sriov:      'FF6AE8E8',
-      wmg:        'FFECEC44',
-      oam:        'FFF5C078',
-      controller: 'FF78E090',
-      rte:        'FF88A4E8',
+      empty:     'FFD8D8D8',
+      dismantle: 'FFB0B0B8',
+      standard:  'FFB8D4F0',
     };
     // VM box colours keyed by VM type prefix
     const VM_ARGB = {
       DGW: 'FF33DDFF',
-      WMG: 'FFEEEE00',
       HA:  'FF66DD66',
       MME: 'FFFFAA33',
       CGW: 'FFCC88FF',
     };
-    const TYPE_ABBR = { kickstart:'Kickstart', dismantle:'Dismantle', sriov:'SRIOV', wmg:'WMG', oam:'OAM', controller:'CTRL', rte:'RTE', standard:'Standard' };
-    const EMPTY_SUFFIX_TYPES = new Set(['sriov', 'wmg', 'standard']); // only these get " empty"
+    const TYPE_ABBR = { dismantle:'Dismantle', standard:'Standard' };
 
     const HDR_FILL = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1F4E79' } };
     const HDR_FONT = { bold:true, color:{ argb:'FFFFFFFF' }, size:10 };
@@ -3518,14 +2905,9 @@
     const SEP_FILL = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFFFFF' } };
     function styleSep(cell) { cell.fill = SEP_FILL; }
 
-    // Compute-number text colours matching rack colour scheme
     const TYPE_TEXT_ARGB = {
-      standard:   'FFFFFFFF',
-      sriov:      'FF19EDFF',
-      wmg:        'FFFFFF33',
-      oam:        'FFFFB570',
-      controller: 'FF36C459',
-      rte:        'FF4A7FD4',
+      standard:  'FFFFFFFF',
+      dismantle: 'FF888899',
     };
 
     // ── Optional site-name title row ─────────────────────────
@@ -3541,25 +2923,16 @@
 
     // ── Type count bar ────────────────────────────────────────
     const TC_TYPES = [
-      { key:'standard',   label:'Standard',   bgArgb:'FFB8D4F0', txtArgb:'FF1A3060' },
-      { key:'rte',        label:'RTE',         bgArgb:'FF88A4E8', txtArgb:'FF0A1A35' },
-      { key:'controller', label:'Controller',  bgArgb:'FF78E090', txtArgb:'FF0D2A15' },
-      { key:'oam',        label:'OAM',         bgArgb:'FFF5C078', txtArgb:'FF2A1500' },
-      { key:'sriov',      label:'SRIOV',       bgArgb:'FF6AE8E8', txtArgb:'FF002A2E' },
-      { key:'wmg',        label:'WMG',         bgArgb:'FFECEC44', txtArgb:'FF2A2A00' },
-      { key:'gold',       label:'Gold CPU',    bgArgb:'FFFF80FF', txtArgb:'FF2A002A' },
+      { key:'standard',  label:'Standard',  bgArgb:'FFB8D4F0', txtArgb:'FF1A3060' },
+      { key:'dismantle', label:'Dismantle', bgArgb:'FFB0B0B8', txtArgb:'FF333344' },
     ];
     const allNums = [];
     cabinets.forEach(cab => {
-      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) {
-        if (kickstartNum !== null && n === kickstartNum) continue;
-        allNums.push(n);
-      }
+      for (let n = cab.startNum; n < cab.startNum + cab.count; n++) allNums.push(n);
     });
     const typeCounts = {
-      standard:   allNums.filter(n => !rteSet.has(n) && !ctrlSet.has(n) && !oamSet.has(n) && !sriovSet.has(n) && !wmgSet.has(n)).length,
-      rte:        rteSet.size, controller: ctrlSet.size, oam: oamSet.size,
-      sriov:      sriovSet.size, wmg: wmgSet.size, gold: goldSet.size,
+      standard:  allNums.filter(n => !dismantleSet2.has(n)).length,
+      dismantle: dismantleSet2.size,
     };
     const activeTypes = TC_TYPES.filter(t => typeCounts[t.key] > 0);
     ws.addRow(Array(totalCols).fill(''));
@@ -3626,8 +2999,7 @@
           ws.mergeCells(rowNum - 1, vr + 1, rowNum, vr + 1); // sep always vertical
           const topComputeIdx = perCabTopUToIdx[i][topU];
           const _topN         = topComputeIdx !== undefined ? cab.startNum + topComputeIdx : undefined;
-          const topIsCompute  = topComputeIdx !== undefined && topComputeIdx < cab.count
-                                && !(kickstartNum !== null && _topN === kickstartNum);
+          const topIsCompute  = topComputeIdx !== undefined && topComputeIdx < cab.count;
           if (topIsCompute) {
             const n = _topN;
             const { left: lvm, right: rvm } = getServerVmSlots(n);
@@ -3661,20 +3033,18 @@
 
         const computeIdx = perCabTopUToIdx[i][u];
         const _xlsN      = computeIdx !== undefined ? cab.startNum + computeIdx : undefined;
-        const isCompute  = computeIdx !== undefined && computeIdx < cab.count
-                           && !(kickstartNum !== null && _xlsN === kickstartNum);
+        const isCompute  = computeIdx !== undefined && computeIdx < cab.count;
 
         if (isCompute) {
           const n        = _xlsN;
           const type     = slotType(n);
           const abbr     = TYPE_ABBR[type];
-          const gold     = goldSet.has(n);
           const { left: lvm, right: rvm } = getServerVmSlots(n);
-          const textArgb = gold ? 'FFCC00CC' : (TYPE_TEXT_ARGB[type] || 'FFFFFFFF');
+          const textArgb = TYPE_TEXT_ARGB[type] || 'FFFFFFFF';
           const bgArgb   = SLOT_ARGB[type];
 
           // u-label: compute number (C prefix) in type colour
-          uLblCell.value     = `C${n}${gold ? '★' : ''}`;
+          uLblCell.value     = `C${n}`;
           uLblCell.font      = { size:9, bold:true, color:{ argb: textArgb } };
           uLblCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFF0F0F0' } };
           uLblCell.alignment = { horizontal:'center', vertical:'middle' };
@@ -3684,10 +3054,10 @@
             // No VMs — type name will be centred after 2×2 merge in bottom-U pass;
             // put content in vm-left (top-left of the future merged region).
             vmLCell.value     = abbr
-              ? (EMPTY_SUFFIX_TYPES.has(type) ? { richText: [
+              ? { richText: [
                   { text: abbr,     font: { size:8, bold:true,  color:{ argb: textArgb } } },
                   { text: ' empty', font: { size:4, bold:false, color:{ argb: textArgb } } },
-                ]} : abbr)
+                ]}
               : '';
             vmLCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
             vmLCell.alignment = { horizontal:'center', vertical:'middle' };
@@ -3734,7 +3104,6 @@
     }
     const VM_SUMMARY = [
       { label: 'DGW',  map: vm1Assignments,  argb: 'FF19EDFF' },
-      { label: 'WMG',  map: vm2Assignments,  argb: 'FFFFFF33' },
       { label: 'HA',   map: haAssignments,   argb: 'FF7EE787' },
       { label: 'MME',  map: mmeAssignments,  argb: 'FFFFAA33' },
       { label: 'CGW',  map: cgwAssignments,  argb: 'FFCC88FF' },
@@ -3760,7 +3129,6 @@
     const wsVm = wb.addWorksheet('VM Allocation');
     const VM_GROUPS = [
       { label: 'DGW',  map: vm1Assignments,  hdrArgb: 'FF006080', textArgb: 'FF19EDFF', bgArgb: 'FF003040' },
-      { label: 'WMG',  map: vm2Assignments,  hdrArgb: 'FF808000', textArgb: 'FFFFFF33', bgArgb: 'FF404000' },
       { label: 'HA',   map: haAssignments,   hdrArgb: 'FF0D6B22', textArgb: 'FF7EE787', bgArgb: 'FF062E0E' },
       { label: 'MME',  map: mmeAssignments,  hdrArgb: 'FF804A00', textArgb: 'FFFFAA33', bgArgb: 'FF402500' },
       { label: 'CGW',  map: cgwAssignments,  hdrArgb: 'FF5A2080', textArgb: 'FFCC88FF', bgArgb: 'FF2A0A40' },
