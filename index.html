@@ -1135,7 +1135,7 @@
     });
     const hasLast = _csdRows.some(r => r.isLast);
     const btn = document.getElementById('csdAddCabBtn');
-    if (btn) btn.style.display = (hasLast && _csdRows.length > 0) ? '' : 'none';
+    if (btn) btn.style.display = (hasLast && _csdRows.length > 0) ? 'inline-flex' : 'none';
   }
 
   function addComputeRow() {
