@@ -1038,8 +1038,7 @@
           <th class="cab-num">#</th>
           <th>Cabinet</th>
           <th>Number of Servers</th>
-          <th>First # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
-          <th>Last # <span style="font-weight:400;color:#484f58;">(optional)</span></th>
+          <th>Switches</th>
         </tr>
       </thead>
       <tbody id="cabinetTbody"></tbody>
@@ -1048,6 +1047,13 @@
     cabinetDefs.forEach((def, ci) => {
       const i = ci + 1;
       const maxSlots = def.slotMap.length;
+
+      // Build switch label list for this cabinet
+      const swEntries = Object.values(cabSwitches[ci] || {});
+      const swText = swEntries.length
+        ? swEntries.map(sw => (typeof sw === 'object' ? sw.label : sw)).join(', ')
+        : '<span style="color:#484f58;">—</span>';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="cab-num" style="color:#58a6ff; font-weight:700;">C${i}</td>
@@ -1057,10 +1063,7 @@
             style="width:70px;" oninput="wrapCount(this, ${maxSlots})" />
           <span style="font-size:12px; color:#8b949e; margin-left:6px;">max ${maxSlots}</span>
         </td>
-        <td><input type="number" id="cab-first-${i}" min="1" placeholder="auto"
-            style="width:70px;" oninput="syncRange(${i})" /></td>
-        <td><input type="number" id="cab-last-${i}"  min="1" placeholder="auto"
-            style="width:70px;" oninput="syncRange(${i})" /></td>
+        <td style="font-size:12px; color:#6699cc;">${swText}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -2035,23 +2038,9 @@
     cabinetDefs.forEach((def, ci) => {
       const i = ci + 1;
       const countEl = document.getElementById(`cab-count-${i}`);
-      const firstEl = document.getElementById(`cab-first-${i}`);
-      const lastEl  = document.getElementById(`cab-last-${i}`);
-      const maxSlotsForCab = def.slotMap.length;
-      const fVal = firstEl?.value.trim() !== '' ? parseInt(firstEl.value) : null;
-      const lVal = lastEl?.value.trim()  !== '' ? parseInt(lastEl.value)  : null;
-      let startNum, count;
-      if (fVal !== null && lVal !== null && lVal >= fVal) {
-        startNum = fVal;
-        count    = Math.min(lVal - fVal + 1, maxSlotsForCab);
-        nextNum  = fVal + count;
-      } else {
-        const userCount = Math.min(parseInt(countEl?.value) || 0, maxSlotsForCab);
-        count    = userCount;
-        startNum = nextNum;
-        nextNum  = startNum + count;
-      }
-      cabinets.push({ name: def.name, count, startNum });
+      const count   = Math.min(parseInt(countEl?.value) || 0, def.slotMap.length);
+      cabinets.push({ name: def.name, count, startNum: nextNum });
+      nextNum += count;
     });
     const cabinetSize = cabinetDefs.reduce((m, d) => Math.max(m, d.height), 48);
     return { cabinets, cabinetSize };
