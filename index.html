@@ -150,7 +150,7 @@
       color: #888; font-size: 13px; cursor: pointer; padding: 2px 8px; flex-shrink: 0;
     }
     .csd-remove:hover { border-color: #f85149; color: #f85149; }
-    #csdProceedBtn { display: none; }
+    #csdAddCabBtn { display: none; }
 
     /* Cabinet server-count table */
     .cab-icon { font-size: 18px; }
@@ -785,7 +785,7 @@
       <h2>Step 1 — Define Cabinet</h2>
       <p>Define each cabinet's height and compute slot positions, then click <strong>+ Add Cabinet</strong>. Repeat for every cabinet, then configure server counts.</p>
       <div>
-        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
           <div>
             <label for="siteName">Site Name</label>
             <input type="text" id="siteName" placeholder="e.g. DC-West-01" style="width:200px;" />
@@ -798,6 +798,14 @@
             <label for="newCabHeight">Cabinet Height (U)</label>
             <input type="number" id="newCabHeight" min="1" max="200" value="48" style="width:90px;" />
           </div>
+        </div>
+        <!-- Copy-from row — shown only when ≥1 cabinet already defined -->
+        <div id="copyFromRow" class="hidden" style="display:none; align-items:center; gap:10px; margin-bottom:16px; padding:8px 12px; background:#161b22; border:1px solid #30363d; border-radius:6px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:#8b949e;">Copy slots & height from:</span>
+          <select id="copyFromSelect" onchange="copyFromCabinet(this.value)"
+                  style="background:#0d1117; border:1px solid #30363d; border-radius:5px; color:#e6edf3; padding:4px 10px; font-size:13px; cursor:pointer;">
+            <option value="">— select existing cabinet —</option>
+          </select>
         </div>
 
         <!-- Compute slot definition -->
@@ -1185,6 +1193,7 @@
     renderCabinetList();
     // Reset form for next cabinet
     document.getElementById('newCabName').value = '';
+    document.getElementById('copyFromSelect').value = '';
     _csdRows = [{ startU: '', uSize: 2, isLast: false }];
     renderCsdRows();
   }
@@ -1198,6 +1207,7 @@
     const section = document.getElementById('cabinetListSection');
     const listEl  = document.getElementById('cabinetListEl');
     if (!section || !listEl) return;
+    updateCopyFromSelect();
     if (cabinetDefs.length === 0) { section.classList.add('hidden'); return; }
     section.classList.remove('hidden');
     listEl.innerHTML = '';
@@ -1212,6 +1222,33 @@
       `;
       listEl.appendChild(div);
     });
+  }
+
+  function updateCopyFromSelect() {
+    const row = document.getElementById('copyFromRow');
+    const sel = document.getElementById('copyFromSelect');
+    if (!row || !sel) return;
+    if (cabinetDefs.length === 0) { row.style.display = 'none'; return; }
+    row.style.display = 'flex';
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— select existing cabinet —</option>' +
+      cabinetDefs.map((d, i) => `<option value="${i}">${d.name} (${d.height}U, ${d.slotMap.length} slots)</option>`).join('');
+    sel.value = prev;
+  }
+
+  function copyFromCabinet(idx) {
+    if (idx === '') return;
+    const src = cabinetDefs[parseInt(idx)];
+    if (!src) return;
+    document.getElementById('newCabHeight').value = src.height;
+    _csdRows = src.slotMap.map(([b, t], i) => ({
+      startU: b,
+      uSize:  t - b + 1,
+      isLast: i === src.slotMap.length - 1,
+    }));
+    renderCsdRows();
+    // Clear the select so user can pick again later
+    document.getElementById('copyFromSelect').value = '';
   }
 
   function showServerCountStep() {
