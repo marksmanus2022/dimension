@@ -784,7 +784,10 @@
   <div id="configSection">
     <div class="card">
       <h2>Step 1 — Define Cabinet Layout</h2>
-      <p>Enter a site name, then load a YAML file to define your cabinet layout.</p>
+      <p>Enter a site name, then load a YAML file to define your cabinet layout.
+         <a href="#" onclick="downloadSampleYaml(); return false;"
+            style="color:#58a6ff; font-size:12px; margin-left:8px;">&#11015; Download sample YAML</a>
+      </p>
       <div style="display:flex; flex-direction:column; gap:20px; max-width:400px;">
         <div>
           <label for="siteName">Site Name</label>
@@ -3442,6 +3445,46 @@
   }
 
   // ── YAML Load ─────────────────────────────────────────────────
+  const SAMPLE_YAML = `shelf:
+  - id: 1
+    height: 48
+    Cabinet:
+      - id: 1
+        size: 1
+        slot: 3
+      - id: 2
+        size: 2
+        slot: 5
+      - id: 3
+        size: 2
+        slot: 7
+
+  - id: 2
+    height: 48
+    Cabinet:
+      - id: 1
+        size: 1
+        slot: 3
+      - id: 2
+        size: 2
+        slot: 5
+      - id: 3
+        size: 2
+        slot: 7
+      - id: 4
+        size: 1
+        slot: 9
+`;
+
+  function downloadSampleYaml() {
+    const blob = new Blob([SAMPLE_YAML], { type: 'text/yaml' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sample-cabinet-layout.yaml';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   function triggerLoadYaml() {
     const input = document.getElementById('loadYamlInput');
     input.value = '';
