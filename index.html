@@ -261,34 +261,7 @@
       position: relative;
     }
     .rack-slot.slot-2u { height: 29px; }
-    /* VM square tags */
-    .vm-tag {
-      width: 62px;
-      height: 29px;
-      border-radius: 2px;
-      border: 1px solid rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      font-size: 9px;
-      font-weight: 800;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      pointer-events: auto;
-      cursor: grab;
-      white-space: pre;
-      flex-shrink: 0;
-    }
-    .vm-tag:active        { cursor: grabbing; }
-    .vm-tag.vm-dragging   { opacity: 0.35; cursor: grabbing; }
-    .vm-tag-placeholder {
-      width: 62px;
-      height: 29px;
-      flex-shrink: 0;
-    }
-    /* Type label shown inside bar when no VMs assigned */
+    /* Type label shown inside bar */
     .slot-type-label {
       flex: 1;
       text-align: center;
@@ -354,100 +327,12 @@
     }
     .attr-btn:active { transform: scale(0.95); }
 
-    /* VM allocation sidebar */
-    .rack-and-vm-wrap {
-      display: flex;
-      align-items: flex-start;
-      gap: 0;
-      overflow-x: auto;
-      padding-bottom: 8px;
-    }
-    .vm-sidebar {
-      flex-shrink: 0;
-      width: fit-content;
-      margin-left: 24px;
-      padding: 14px 12px;
-      background: #12181f;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .vm-row {
-      display: flex;
-      gap: 12px;
-    }
-    .vm-row .vm-slot-block {
-      width: 130px;
-      flex: none;
-      min-width: 0;
-    }
-    .vm-sidebar-title {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #58a6ff;
-      border-bottom: 1px solid #30363d;
-      padding-bottom: 8px;
-    }
-    .vm-slot-block { display: flex; flex-direction: column; gap: 8px; }
-    .vm-slot-label { font-size: 11px; font-weight: 700; color: #e6edf3; }
-    .vm-field { display: flex; flex-direction: column; gap: 4px; }
-    .vm-field label { font-size: 11px; color: #8b949e; margin: 0; }
-    .vm-field select, .vm-field input { width: 100%; font-size: 13px; }
-    .vm-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .vm-divider { border-top: 1px solid #30363d; margin: 2px 0; }
-    .vm-hint { font-size: 10px; color: #484f58; line-height: 1.5; margin: 0; }
-
     /* Slot selection highlight */
     .rack-slot.selected {
       outline: 2px solid #ffffff;
       outline-offset: 1px;
     }
-    .rack-slot.drag-over-valid   { outline: 2px solid #3fb950 !important; box-shadow: inset 0 0 0 100px rgba(63,185,80,0.12); }
-    .rack-slot.drag-over-invalid { outline: 2px solid #f85149 !important; box-shadow: inset 0 0 0 100px rgba(248,81,73,0.12); }
     .rack-slot { position: relative; }
-    .rack-slot.drag-hint-left::before {
-      content: ''; position: absolute; inset: 0 50% 0 0;
-      background: rgba(63,185,80,0.35); border-radius: 2px 0 0 2px; pointer-events: none; z-index: 1;
-    }
-    .rack-slot.drag-hint-right::after {
-      content: ''; position: absolute; inset: 0 0 0 50%;
-      background: rgba(63,185,80,0.35); border-radius: 0 2px 2px 0; pointer-events: none; z-index: 1;
-    }
-
-    /* VM rename popup */
-    #vmRenamePopup {
-      position: fixed; z-index: 9999;
-      background: #161b22; border: 1px solid #58a6ff; border-radius: 10px;
-      padding: 14px 18px; min-width: 220px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    #vmRenamePopup.hidden { display: none; }
-    #vmRenamePopup .vrp-title { font-size: 12px; font-weight: 700; color: #58a6ff; }
-    #vmRenamePopup .vrp-row   { display: flex; align-items: center; gap: 8px; }
-    #vmRenamePopup .vrp-prefix { font-size: 13px; font-weight: 700; color: #e6edf3; flex-shrink: 0; }
-    #vmRenamePopup .vrp-input {
-      width: 80px; background: #0d1117; border: 1px solid #30363d; border-radius: 5px;
-      color: #e6edf3; font-size: 13px; font-weight: 700; padding: 4px 8px;
-    }
-    #vmRenamePopup .vrp-input.vrp-error { border-color: #f85149; }
-    #vmRenamePopup .vrp-errmsg { font-size: 11px; color: #ff7b72; min-height: 14px; }
-    #vmRenamePopup .vrp-foot   { display: flex; justify-content: flex-end; gap: 8px; }
-    #vmRenamePopup .vrp-ok     {
-      background: #1f4a8a; color: #58a6ff; border: 1px solid #388bfd;
-      border-radius: 6px; padding: 5px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
-    }
-    #vmRenamePopup .vrp-ok:hover { background: #2d5fa0; }
-    #vmRenamePopup .vrp-cancel {
-      background: transparent; color: #8b949e; border: 1px solid #30363d;
-      border-radius: 6px; padding: 5px 16px; font-size: 13px; cursor: pointer;
-    }
-    #vmRenamePopup .vrp-cancel:hover { background: #21262d; }
-    .vm-tag { user-select: none; }
 
     /* Switch device slot */
     .rack-slot.switch-device {
@@ -697,10 +582,6 @@
       .rack-slot.dismantle   { background: #e0e0e4 !important; border-color: #888899 !important; }
       .rack-slot.empty       { background: #f5f5f5 !important; border-color: #ddd !important; }
       .slot-label            { color: #333 !important; }
-      .vm-sidebar      { border-color: #aaa !important; background: #f5f5f5 !important; width: auto !important; }
-      .vm-sidebar-title{ color: #1f6feb !important; border-color: #ccc !important; }
-      .vm-slot-label   { color: #000 !important; }
-      .vm-field label  { color: #555 !important; }
       .vm-actions      { display: none; }
       .summary-pill    { background: #eee !important; border-color: #ccc !important; color: #333 !important; }
       .summary-pill strong { color: #000 !important; }
@@ -845,93 +726,18 @@
         </div>
       </div>
 
-      <div class="rack-and-vm-wrap">
-        <div class="layout-grid-scroll">
-          <div style="display:inline-flex; flex-direction:column; width:max-content;">
-            <div id="siteNameDisplay" style="display:none; text-align:center; padding:10px 0 14px; width:100%;">
-              <span style="font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#58a6ff;">&#9670; Site &#9670;</span>
-              <div id="siteNameText" style="font-size:30px; font-weight:800; color:#e6edf3; letter-spacing:2px; margin-top:4px;"></div>
-            </div>
-            <div class="layout-grid" id="layoutGrid"></div>
+      <div class="layout-grid-scroll">
+        <div style="display:inline-flex; flex-direction:column; width:max-content;">
+          <div id="siteNameDisplay" style="display:none; text-align:center; padding:10px 0 14px; width:100%;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#58a6ff;">&#9670; Site &#9670;</span>
+            <div id="siteNameText" style="font-size:30px; font-weight:800; color:#e6edf3; letter-spacing:2px; margin-top:4px;"></div>
           </div>
-        </div>
-
-        <!-- VM Allocation sidebar — floats to the right of the last cabinet -->
-        <div class="vm-sidebar" id="vmSidebar">
-          <div class="vm-sidebar-title">VM Allocation</div>
-
-          <!-- Row 1: DGW -->
-          <div class="vm-row">
-            <!-- 1st VM -->
-            <div class="vm-slot-block">
-              <div class="vm-slot-label"><span style="color:#19edff;">DGW</span><span id="vm1ZeroMark" style="display:none; color:#ff4444; font-weight:900; margin-left:5px;">✕</span></div>
-              <input type="hidden" id="vm1Select" value="DGW" />
-              <div class="vm-field" id="vm1NumRow">
-                <label>Total VMs</label>
-                <input type="number" id="vm1Num" min="0" value="30" />
-              </div>
-              <div class="vm-actions">
-                <button class="btn btn-blue btn-sm" onclick="assignVM1()">Assign</button>
-                <button class="btn btn-danger btn-sm" onclick="removeVM1()">Remove</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="vm-divider" id="haDivider" style="display:none;"></div>
-
-          <!-- Row 2: 3rd (HA) + 4th (MME) — shown after DGW committed -->
-          <div class="vm-row" id="haMMERow" style="display:none;">
-            <!-- HA VM -->
-            <div class="vm-slot-block" id="haBlock">
-              <div class="vm-slot-label"><span style="color:#7ee787;">HA</span><span id="haZeroMark" style="display:none; color:#ff4444; font-weight:900; margin-left:5px;">✕</span></div>
-              <div class="vm-field">
-                <label>Total VMs</label>
-                <input type="number" id="haNum" min="0" value="22" />
-              </div>
-              <div class="vm-actions">
-                <button class="btn btn-blue btn-sm" onclick="assignHA()">Assign</button>
-                <button class="btn btn-danger btn-sm" onclick="removeHA()">Remove</button>
-              </div>
-            </div>
-
-            <!-- MME VM (shown after HA committed) -->
-            <div class="vm-slot-block" id="mmeBlock" style="display:none;">
-              <div class="vm-slot-label"><span style="color:#ffaa33;">MME</span><span id="mmeZeroMark" style="display:none; color:#ff4444; font-weight:900; margin-left:5px;">✕</span></div>
-              <div class="vm-field">
-                <label>Total VMs</label>
-                <input type="number" id="mmeNum" min="0" value="19" />
-              </div>
-              <div class="vm-actions">
-                <button class="btn btn-blue btn-sm" onclick="assignMME()">Assign</button>
-                <button class="btn btn-danger btn-sm" onclick="removeMME()">Remove</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="vm-divider" id="cgwDivider" style="display:none;"></div>
-
-          <!-- Row 3: 5th (CGW) — shown after HA committed -->
-          <div class="vm-row" id="cgwRow" style="display:none;">
-            <div class="vm-slot-block" id="cgwBlock">
-              <div class="vm-slot-label"><span style="color:#c792ea;">CGW</span><span id="cgwZeroMark" style="display:none; color:#ff4444; font-weight:900; margin-left:5px;">✕</span></div>
-              <div class="vm-field">
-                <label>Total VMs</label>
-                <input type="number" id="cgwNum" min="0" value="9" />
-              </div>
-              <div class="vm-actions">
-                <button class="btn btn-blue btn-sm" onclick="assignCGW()">Assign</button>
-                <button class="btn btn-danger btn-sm" onclick="removeCGW()">Remove</button>
-              </div>
-            </div>
-          </div>
-
+          <div class="layout-grid" id="layoutGrid"></div>
         </div>
       </div>
 
       <div class="actions-bar">
         <button class="btn btn-secondary" onclick="backToConfig()">&#8592; Edit Configuration</button>
-        <button class="btn btn-undo-redo btn" id="undoBtn" onclick="undo()" disabled title="Undo last VM move">&#8617; Undo</button>
-        <button class="btn btn-undo-redo btn" id="redoBtn" onclick="redo()" disabled title="Redo last undone VM move">&#8618; Redo</button>
         <button class="btn btn-blue" onclick="openPrintSetup('pdf')">&#128438; Print PDF</button>
         <button class="btn btn-blue" onclick="doExcelExport()">&#128202; Print Excel</button>
         <button class="btn btn-secondary" onclick="toggleExport()">&#128196; Export Text Summary</button>
@@ -2449,63 +2255,13 @@
           slot.style.height = (uSize * 16 - 3) + 'px';
           slot.dataset.num  = serverNum;
           slot.title        = `Server ${serverNum}${tags.length ? ' [' + tags.join(', ') + ']' : ''} — ${cab.name}, U${bottomU}-${u}`;
-          slot.onclick      = e => {
-            toggleSelectSlot(serverNum);
-            const { left: lv, right: rv } = getServerVmSlots(serverNum);
-            if (!lv && !rv)
-              openChangeTypePopup(serverNum, ci, computeIdx, e.clientX, e.clientY);
-          };
-          slot.addEventListener('dragover',  e => onSlotDragOver(e, serverNum, slot));
-          slot.addEventListener('dragleave', e => onSlotDragLeave(e, slot));
-          slot.addEventListener('drop',      e => onSlotDrop(e, serverNum, slot));
-          const { left: leftVm, right: rightVm } = getServerVmSlots(serverNum);
-          if (leftVm || rightVm) {
-            const leftEl = document.createElement('span');
-            if (leftVm) {
-              leftEl.className = 'vm-tag';
-              leftEl.draggable = true;
-              leftEl.style.background = vmTagColor(leftVm);
-              leftEl.textContent = leftVm.replace('-', '\n');
-              leftEl.title = `${leftVm} — drag to move, double-click to rename`;
-              leftEl.addEventListener('dragstart', e => onVmDragStart(e, leftVm, serverNum));
-              leftEl.addEventListener('dragend',   onVmDragEnd);
-              leftEl.addEventListener('dblclick',  e => { e.stopPropagation(); openVmRename(leftVm, serverNum, e.clientX, e.clientY); });
-              slot.title += ` | VM: ${leftVm}`;
-            } else {
-              leftEl.className = 'vm-tag-placeholder';
-            }
-            slot.appendChild(leftEl);
-            const rightEl = document.createElement('span');
-            if (rightVm) {
-              rightEl.className = 'vm-tag';
-              rightEl.draggable = true;
-              rightEl.style.background = vmTagColor(rightVm);
-              rightEl.textContent = rightVm.replace('-', '\n');
-              rightEl.title = `${rightVm} — drag to move, double-click to rename`;
-              rightEl.addEventListener('dragstart', e => onVmDragStart(e, rightVm, serverNum));
-              rightEl.addEventListener('dragend',   onVmDragEnd);
-              rightEl.addEventListener('dblclick',  e => { e.stopPropagation(); openVmRename(rightVm, serverNum, e.clientX, e.clientY); });
-              slot.title += ` | VM: ${rightVm}`;
-            } else {
-              rightEl.className = 'vm-tag-placeholder';
-            }
-            slot.appendChild(rightEl);
-          } else {
-            if (barCls === 'dismantle') {
-              const skullEl = document.createElement('span');
-              skullEl.style.cssText = 'font-size:22px; pointer-events:none; line-height:1;';
-              skullEl.textContent = '💀';
-              slot.style.justifyContent = 'center';
-              slot.appendChild(skullEl);
-            } else {
-              const typeAbbr = TYPE_ABBR_MAP[barCls];
-              if (typeAbbr && barCls === 'occupied') {
-                const typeEl = document.createElement('span');
-                typeEl.className = 'slot-type-label';
-                typeEl.innerHTML = typeAbbr + ' <span style="font-size:9px;font-weight:400;opacity:0.65;">empty</span>';
-                slot.appendChild(typeEl);
-              }
-            }
+          slot.onclick = e => openChangeTypePopup(serverNum, ci, computeIdx, e.clientX, e.clientY);
+          if (barCls === 'dismantle') {
+            const skullEl = document.createElement('span');
+            skullEl.style.cssText = 'font-size:22px; pointer-events:none; line-height:1;';
+            skullEl.textContent = '💀';
+            slot.style.justifyContent = 'center';
+            slot.appendChild(skullEl);
           }
         } else if (is2USlot) {
           // Compute position exists in layout but no compute assigned here
@@ -2620,18 +2376,6 @@
     document.getElementById('layoutGrid').innerHTML = '';
     document.getElementById('siteNameDisplay').style.display = 'none';
     document.getElementById('siteName').value = '';
-    vm1Assignments = {};
-    haAssignments  = {};
-    vm1Committed   = false;
-    haCommitted    = false;
-    clearMmeCgwState();
-    document.getElementById('vm1Select').value = 'DGW';
-    document.getElementById('vm1ZeroMark').style.display = 'none';
-    document.getElementById('haZeroMark').style.display  = 'none';
-    document.getElementById('vm1Num').value = 1;
-    document.getElementById('haNum').value  = 1;
-    document.getElementById('mmeNum').value = 1;
-    document.getElementById('cgwNum').value = 1;
     setStepState(1);
   }
 
