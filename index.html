@@ -3198,7 +3198,7 @@
   }
 
   // ── YAML Load ─────────────────────────────────────────────────
-  const SAMPLE_YAML = `shelf:
+  const SAMPLE_YAML = `Cabinet:
   - id: 1
     height: 48
     Cabinet:
@@ -3346,14 +3346,14 @@
     try { data = jsyaml.load(text); }
     catch(e) { alert('Invalid YAML: ' + e.message); return; }
 
-    if (!data || !Array.isArray(data.shelf) || data.shelf.length === 0) {
-      alert('YAML must have a top-level "shelf" array with at least one entry.');
+    if (!data || !Array.isArray(data.Cabinet) || data.Cabinet.length === 0) {
+      alert('YAML must have a top-level "Cabinet" array with at least one entry.');
       return;
     }
 
     cabinetDefs = [];
-    data.shelf.forEach((shelf, si) => {
-      const name     = `Shelf ${shelf.id != null ? shelf.id : si + 1}`;
+    data.Cabinet.forEach((shelf, si) => {
+      const name     = `Cabinet ${shelf.id != null ? shelf.id : si + 1}`;
       const computes = Array.isArray(shelf.Cabinet) ? shelf.Cabinet : [];
       const slotMap   = computes.map(c => {
         const startU = Math.max(1, parseInt(c.slot) || 1);
@@ -3493,14 +3493,14 @@
     }
 
     if (cabinetDefs.length === 0) {
-      alert('Please load a Cabinet YAML first so shelf IDs can be matched.');
+      alert('Please load a Cabinet YAML first so Cabinet IDs can be matched.');
       return;
     }
 
-    // Build shelf id → cabinet index map
+    // Build cabinet id → cabinet index map
     const shelfIdToCi = {};
     cabinetDefs.forEach((def, ci) => {
-      const match = def.name.match(/Shelf\s+(\S+)/i);
+      const match = def.name.match(/Cabinet\s+(\S+)/i);
       if (match) shelfIdToCi[match[1]] = ci;
     });
 
@@ -3512,7 +3512,7 @@
       const shelfId = String(entry.id ?? '');
       const ci = shelfIdToCi[shelfId];
       if (ci === undefined) {
-        warnings.push(`Shelf id "${shelfId}" not found — skipped.`);
+        warnings.push(`Cabinet id "${shelfId}" not found — skipped.`);
         return;
       }
       const cabHeight = cabinetDefs[ci].height;
@@ -3521,8 +3521,8 @@
         const startU = parseInt(dev.slot);
         const uSize  = Math.max(1, parseInt(dev.size) || 1);
         const topU   = startU + uSize - 1;
-        if (!startU || startU < 1) { warnings.push(`Invalid slot "${dev.slot}" in shelf ${shelfId} — skipped.`); return; }
-        if (topU > cabHeight) { warnings.push(`Switch U${startU}-U${topU} exceeds shelf ${shelfId} height (${cabHeight}U) — skipped.`); return; }
+        if (!startU || startU < 1) { warnings.push(`Invalid slot "${dev.slot}" in Cabinet ${shelfId} — skipped.`); return; }
+        if (topU > cabHeight) { warnings.push(`Switch U${startU}-U${topU} exceeds Cabinet ${shelfId} height (${cabHeight}U) — skipped.`); return; }
         const label = (dev.name || '').trim() || `SW-${shelfId}-${dev.id ?? (count + 1)}`;
         if (!cabSwitches[ci]) cabSwitches[ci] = {};
         cabSwitches[ci][topU] = { label, uSize };
