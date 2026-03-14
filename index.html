@@ -3205,12 +3205,24 @@
       - id: 1
         size: 1
         slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
       - id: 2
         size: 2
         slot: 5
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
       - id: 3
         size: 2
         slot: 7
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
 
   - id: 2
     height: 48
@@ -3218,15 +3230,89 @@
       - id: 1
         size: 1
         slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
       - id: 2
         size: 2
         slot: 5
-      - id: 3
-        size: 2
-        slot: 7
-      - id: 4
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+
+  - id: 3
+    height: 48
+    Cabinet:
+      - id: 1
         size: 1
-        slot: 9
+        slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+      - id: 2
+        size: 2
+        slot: 5
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+
+  - id: 4
+    height: 48
+    Cabinet:
+      - id: 1
+        size: 1
+        slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+      - id: 2
+        size: 2
+        slot: 5
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+
+  - id: 5
+    height: 48
+    Cabinet:
+      - id: 1
+        size: 1
+        slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+      - id: 2
+        size: 2
+        slot: 5
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+
+  - id: 6
+    height: 48
+    Cabinet:
+      - id: 1
+        size: 1
+        slot: 3
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
+      - id: 2
+        size: 2
+        slot: 5
+        numa: 2
+        vCPU: 96
+        RAM: 4000
+        Disk: 2000
 `;
 
   function downloadSampleYaml() {
@@ -3269,15 +3355,21 @@
     data.shelf.forEach((shelf, si) => {
       const name     = `Shelf ${shelf.id != null ? shelf.id : si + 1}`;
       const computes = Array.isArray(shelf.Cabinet) ? shelf.Cabinet : [];
-      const slotMap  = computes.map(c => {
+      const slotMap   = computes.map(c => {
         const startU = Math.max(1, parseInt(c.slot) || 1);
         const uSize  = Math.max(1, parseInt(c.size) || 1);
         return [startU, startU + uSize - 1];
       });
+      const slotProps = computes.map(c => ({
+        vCPU: c.vCPU != null ? +c.vCPU : null,
+        RAM:  c.RAM  != null ? +c.RAM  : null,
+        Disk: c.Disk != null ? +c.Disk : null,
+        numa: c.numa != null ? +c.numa : null,
+      }));
       // Cabinet height: use explicit YAML field if present, otherwise infer from highest topU
       const height = shelf.height ? Math.max(parseInt(shelf.height), slotMap.reduce((m, [, t]) => Math.max(m, t), 1))
                                   : slotMap.reduce((m, [, t]) => Math.max(m, t), 8);
-      cabinetDefs.push({ name, height, slotMap });
+      cabinetDefs.push({ name, height, slotMap, slotProps });
     });
 
     // Reset allocation state
