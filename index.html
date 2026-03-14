@@ -3393,19 +3393,67 @@
     Cabinet:
       - id: 1
         size: 2
-        slot: 10
+        slot: 44
+        name: Control
       - id: 2
         size: 2
-        slot: 12
+        slot: 46
+        name: Traffic
 
   - id: 2
     Cabinet:
       - id: 1
         size: 2
-        slot: 10
+        slot: 44
+        name: Control
       - id: 2
         size: 2
-        slot: 12
+        slot: 46
+        name: Traffic
+
+  - id: 3
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 44
+        name: Control
+      - id: 2
+        size: 2
+        slot: 46
+        name: Traffic
+
+  - id: 4
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 44
+        name: Control
+      - id: 2
+        size: 2
+        slot: 46
+        name: Traffic
+
+  - id: 5
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 44
+        name: Control
+      - id: 2
+        size: 2
+        slot: 46
+        name: Traffic
+
+  - id: 6
+    Cabinet:
+      - id: 1
+        size: 2
+        slot: 44
+        name: Control
+      - id: 2
+        size: 2
+        slot: 46
+        name: Traffic
 `;
 
   function downloadSampleSwitchYaml() {
@@ -3475,7 +3523,7 @@
         const topU   = startU + uSize - 1;
         if (!startU || startU < 1) { warnings.push(`Invalid slot "${dev.slot}" in shelf ${shelfId} — skipped.`); return; }
         if (topU > cabHeight) { warnings.push(`Switch U${startU}-U${topU} exceeds shelf ${shelfId} height (${cabHeight}U) — skipped.`); return; }
-        const label = `SW-${shelfId}-${dev.id ?? (count + 1)}`;
+        const label = (dev.name || '').trim() || `SW-${shelfId}-${dev.id ?? (count + 1)}`;
         if (!cabSwitches[ci]) cabSwitches[ci] = {};
         cabSwitches[ci][topU] = { label, uSize };
         count++;
