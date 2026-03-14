@@ -2912,6 +2912,10 @@
         continue;
       }
 
+      // If any cabinet has a multi-U slot whose bottom is u-1, this row is a "top" row —
+      // defer all horizontal merges to the bottom-U pass to avoid merge conflicts.
+      const rowHasAnyMultiU = xlsBottomUs.has(u - 1);
+
       cabinets.forEach((cab, i) => {
         const uc = cabUColOf(i);
         const vl = cabVmLOf(i);
@@ -2925,11 +2929,6 @@
         const computeIdx = perCabTopUToIdx[i][u];
         const isCompute  = computeIdx !== undefined && computeIdx < cab.count;
         const sw         = perCabSwitchTopU[i][u];
-
-        // Is this U the top of a multi-U slot? If so, defer horizontal merge to bottom-U pass
-        const isMultiU = isCompute
-          ? (() => { const [b,t] = getSlotMap(i)[computeIdx]; return t > b; })()
-          : (sw ? sw.uSize > 1 : false);
 
         if (isCompute) {
           const n        = cab.startNum + computeIdx;
@@ -2955,7 +2954,7 @@
           vmLCell.border    = THIN;
           vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
           vmRCell.border    = THIN;
-          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
+          if (!rowHasAnyMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
 
         } else if (sw) {
           // Switch slot
@@ -2973,7 +2972,7 @@
           vmLCell.border    = THIN;
           vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFCCDDF5' } };
           vmRCell.border    = THIN;
-          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
+          if (!rowHasAnyMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
 
         } else {
           // Empty slot
@@ -2985,7 +2984,7 @@
           vmLCell.border = THIN;
           vmRCell.fill  = { type:'pattern', pattern:'solid', fgColor:{ argb: SLOT_ARGB.empty } };
           vmRCell.border = THIN;
-          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
+          if (!rowHasAnyMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
         }
       });
     }
