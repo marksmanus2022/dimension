@@ -2870,14 +2870,26 @@
       styleSep(hdrRow.getCell(vr + 1));
     });
 
-    // ── Slot rows — one row per U, 2U computes merge two rows ──
-    // xlsBottomUs = union across all cabinets (drives row-skip logic)
-    const xlsBottomUs  = new Set();
-    computeSlotMap.forEach(([b]) => xlsBottomUs.add(b));
-    // Per-cabinet U→computeIdx lookup
+    // ── Slot rows — one row per U, multi-U slots merge rows ─────
+    // Build per-cabinet compute and switch lookups; union bottom Us for row-skip logic
+    const xlsBottomUs = new Set();
     const perCabTopUToIdx = cabinets.map((_, ci) => {
       const m = {};
-      getSlotMap(ci).forEach(([b, t], idx) => { m[t] = idx; });
+      getSlotMap(ci).forEach(([b, t], idx) => {
+        m[t] = idx;
+        if (b !== t) xlsBottomUs.add(b);
+      });
+      return m;
+    });
+    const perCabSwitchTopU = cabinets.map((_, ci) => {
+      const m = {};
+      Object.entries(cabSwitches[ci] || {}).forEach(([uStr, sw]) => {
+        const topU  = parseInt(uStr);
+        const uSize = (typeof sw === 'object') ? sw.uSize : 1;
+        const label = (typeof sw === 'object') ? sw.label : sw;
+        m[topU] = { label, uSize };
+        for (let bu = topU - uSize + 1; bu < topU; bu++) xlsBottomUs.add(bu);
+      });
       return m;
     });
 
@@ -2888,39 +2900,17 @@
       row.height   = ROW_H;
 
       if (xlsBottomUs.has(u)) {
-        // Second (lower) row of a 2U position — merge with the row above.
-        // For computes with no VMs: 2×2 block merge (vm-left + vm-right × 2 rows).
-        // For computes with VMs or unoccupied positions: separate vertical merges per column.
-        const topU = u + 1;
-        cabinets.forEach((cab, i) => {
+        // Lower row(s) of a multi-U slot — merge all cells vertically with the row above
+        cabinets.forEach((_, i) => {
           const uc = cabUColOf(i);
           const vl = cabVmLOf(i);
           const vr = cabVmROf(i);
-          ws.mergeCells(rowNum - 1, uc,     rowNum, uc    ); // u-label always vertical
-          ws.mergeCells(rowNum - 1, vr + 1, rowNum, vr + 1); // sep always vertical
-          const topComputeIdx = perCabTopUToIdx[i][topU];
-          const _topN         = topComputeIdx !== undefined ? cab.startNum + topComputeIdx : undefined;
-          const topIsCompute  = topComputeIdx !== undefined && topComputeIdx < cab.count;
-          if (topIsCompute) {
-            const n = _topN;
-            const { left: lvm, right: rvm } = getServerVmSlots(n);
-            if (!lvm && !rvm) {
-              // No VMs → 2×2 merge so type name is centred across full compute width
-              ws.mergeCells(rowNum - 1, vl, rowNum, vr);
-            } else {
-              // Has VM(s) → keep left and right as separate tall cells
-              ws.mergeCells(rowNum - 1, vl, rowNum, vl);
-              ws.mergeCells(rowNum - 1, vr, rowNum, vr);
-            }
-          } else {
-            // Unoccupied 2U position → 2×2 gray block
-            ws.mergeCells(rowNum - 1, vl, rowNum, vr);
-          }
+          ws.mergeCells(rowNum - 1, uc,     rowNum, uc    );
+          ws.mergeCells(rowNum - 1, vr + 1, rowNum, vr + 1);
+          ws.mergeCells(rowNum - 1, vl,     rowNum, vr    );
         });
         continue;
       }
-
-      const is2UPos = computeSlotMap.some(([,t]) => t === u); // top of a 2U pair in any cab
 
       cabinets.forEach((cab, i) => {
         const uc = cabUColOf(i);
@@ -2933,58 +2923,60 @@
         const vmRCell  = row.getCell(vr);
 
         const computeIdx = perCabTopUToIdx[i][u];
-        const _xlsN      = computeIdx !== undefined ? cab.startNum + computeIdx : undefined;
         const isCompute  = computeIdx !== undefined && computeIdx < cab.count;
+        const sw         = perCabSwitchTopU[i][u];
+
+        // Is this U the top of a multi-U slot? If so, defer horizontal merge to bottom-U pass
+        const isMultiU = isCompute
+          ? (() => { const [b,t] = getSlotMap(i)[computeIdx]; return t > b; })()
+          : (sw ? sw.uSize > 1 : false);
 
         if (isCompute) {
-          const n        = _xlsN;
+          const n        = cab.startNum + computeIdx;
           const type     = slotType(n);
           const abbr     = TYPE_ABBR[type];
-          const { left: lvm, right: rvm } = getServerVmSlots(n);
           const textArgb = TYPE_TEXT_ARGB[type] || 'FFFFFFFF';
           const bgArgb   = SLOT_ARGB[type];
 
-          // u-label: compute number (C prefix) in type colour
           uLblCell.value     = `C${n}`;
           uLblCell.font      = { size:9, bold:true, color:{ argb: textArgb } };
           uLblCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFF0F0F0' } };
           uLblCell.alignment = { horizontal:'center', vertical:'middle' };
           uLblCell.border    = THIN;
 
-          if (!lvm && !rvm) {
-            // No VMs — type name will be centred after 2×2 merge in bottom-U pass;
-            // put content in vm-left (top-left of the future merged region).
-            vmLCell.value     = abbr
-              ? { richText: [
-                  { text: abbr,     font: { size:8, bold:true,  color:{ argb: textArgb } } },
-                  { text: ' empty', font: { size:4, bold:false, color:{ argb: textArgb } } },
-                ]}
-              : '';
-            vmLCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
-            vmLCell.alignment = { horizontal:'center', vertical:'middle' };
-            vmLCell.border    = THIN;
-            vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
-            vmRCell.border    = THIN;
-            // For 1U computes (not in computeSlotMap — edge case), merge now
-            if (!is2UPos) ws.mergeCells(rowNum, vl, rowNum, vr);
-          } else {
-            // Has VM(s) — left and right stay separate
-            if (lvm) {
-              styleVmBox(vmLCell, VM_ARGB[lvm.split('-')[0]] || 'FFCCCCCC', lvm);
-            } else {
-              vmLCell.fill   = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
-              vmLCell.border = THIN;
-            }
-            if (rvm) {
-              styleVmBox(vmRCell, VM_ARGB[rvm.split('-')[0]] || 'FFCCCCCC', rvm);
-            } else {
-              vmRCell.fill   = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
-              vmRCell.border = THIN;
-            }
-          }
+          vmLCell.value     = abbr
+            ? { richText: [
+                { text: abbr,     font: { size:8, bold:true,  color:{ argb: textArgb } } },
+                { text: ' empty', font: { size:4, bold:false, color:{ argb: textArgb } } },
+              ]}
+            : '';
+          vmLCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
+          vmLCell.alignment = { horizontal:'center', vertical:'middle' };
+          vmLCell.border    = THIN;
+          vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb: bgArgb } };
+          vmRCell.border    = THIN;
+          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
+
+        } else if (sw) {
+          // Switch slot
+          const bottomU = u - sw.uSize + 1;
+          uLblCell.value     = `U${bottomU}`;
+          uLblCell.font      = { size:7, bold:true, color:{ argb:'FF6699CC' } };
+          uLblCell.alignment = { horizontal:'center', vertical:'middle' };
+          uLblCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFE8F0FF' } };
+          uLblCell.border    = THIN;
+
+          vmLCell.value     = `🔀 ${sw.label}`;
+          vmLCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFCCDDF5' } };
+          vmLCell.font      = { size:8, bold:true, color:{ argb:'FF1A4A80' } };
+          vmLCell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
+          vmLCell.border    = THIN;
+          vmRCell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFCCDDF5' } };
+          vmRCell.border    = THIN;
+          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
 
         } else {
-          // No compute at this U position
+          // Empty slot
           uLblCell.value     = `U${u}`;
           uLblCell.font      = { size:7, color:{ argb:'FF999999' } };
           uLblCell.alignment = { horizontal:'center', vertical:'middle' };
@@ -2993,7 +2985,7 @@
           vmLCell.border = THIN;
           vmRCell.fill  = { type:'pattern', pattern:'solid', fgColor:{ argb: SLOT_ARGB.empty } };
           vmRCell.border = THIN;
-          if (!is2UPos) ws.mergeCells(rowNum, vl, rowNum, vr);
+          if (!isMultiU) ws.mergeCells(rowNum, vl, rowNum, vr);
         }
       });
     }
