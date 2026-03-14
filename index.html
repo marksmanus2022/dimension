@@ -3539,6 +3539,10 @@
       statusEl.textContent = `✔ Loaded ${count} switch(es) from ${fileName}`;
     }
 
+    // Refresh Step 2 table if visible (so switch names appear immediately)
+    if (!document.getElementById('cabinetInputArea').classList.contains('hidden')) {
+      showServerCountStep();
+    }
     // Re-render racks if layout is already visible
     if (!document.getElementById('layoutSection').classList.contains('hidden')) {
       rerenderRacks();
